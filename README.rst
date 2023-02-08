@@ -1,13 +1,19 @@
-Golioth Reference Design Template
-#################################
+Air Quality Monitor
+###################
 
 Overview
 ********
 
-Use this repo as a template when beginning work on a new Golioth Reference
-Design. It is set up as a standalone repository, with all Golioth features
-implemented in basic form. Search the project for the word ``template`` and
-``rd_template`` and update those occurrences with your reference design's name.
+This reference design demonstrates how to measure ambient air quality within an
+indoor environment using the Golioth IoT platform.
+
+Specifically, the following environmental parameters can be monitored:
+
+* 🦠 Airborne particulate matter (PM)
+* 😷 CO₂
+* 💦 Relative humidity
+* 🌡️ Temperature
+* 💨 Pressure
 
 Local set up
 ************
@@ -21,24 +27,24 @@ Install the Python virtual environment (recommended)
 .. code-block:: console
 
    cd ~
-   mkdir golioth-reference-design-template
-   python -m venv golioth-reference-design-template/.venv
-   source golioth-reference-design-template/.venv/bin/activate
+   mkdir golioth-reference-design-air-quality
+   python -m venv golioth-reference-design-air-quality/.venv
+   source golioth-reference-design-air-quality/.venv/bin/activate
    pip install wheel west
 
 Use ``west`` to initialize and install
-==================================
+======================================
 
 .. code-block:: console
 
-   cd ~/golioth-reference-design-template
-   west init -m git@github.com:golioth/reference-design-template.git .
+   cd ~/golioth-reference-design-air-quality
+   west init -m git@github.com:golioth/reference-design-air-quality.git .
    west update
    west zephyr-export
    pip install -r deps/zephyr/scripts/requirements.txt
 
 This will also install the `golioth-zephyr-boards`_ definitions for the Golioth
-Aludel-Mini.
+Aludel-Mini carrier board.
 
 Building the application
 ************************
