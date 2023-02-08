@@ -1,5 +1,5 @@
 sample:
-  description: Golioth Reference Design Template
+  description: Golioth Reference Design - Air Quality Monitor
   name: air_quality
 common:
   harness: net

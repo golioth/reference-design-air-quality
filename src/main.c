@@ -64,7 +64,7 @@ void main(void)
 {
 	int err;
 
-	LOG_DBG("Start Reference Design Template sample");
+	LOG_DBG("Start Air Quality Monitor app");
 
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
