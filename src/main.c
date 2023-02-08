@@ -5,7 +5,7 @@
  */
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(golioth_rd_template, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 
 #include <net/golioth/system_client.h>
 #include <samples/common/net_connect.h>

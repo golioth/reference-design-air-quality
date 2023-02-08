@@ -102,10 +102,10 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp) {
 
 	LOG_HEXDUMP_DBG(rsp->data, rsp->len, APP_STATE_DESIRED_ENDP);
 
-	struct template_state parsed_state;
+	struct air_quality_state parsed_state;
 
 	int ret = json_obj_parse((char *)rsp->data, rsp->len,
-			template_state_descr, ARRAY_SIZE(template_state_descr),
+			air_quality_state_descr, ARRAY_SIZE(air_quality_state_descr),
 			&parsed_state);
 
 	if (ret < 0) {
