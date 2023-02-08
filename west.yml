@@ -4,7 +4,7 @@ manifest:
   projects:
     - name: golioth
       path: modules/lib/golioth
-      revision: v0.5.0
+      revision: a5a177d8cc9d49b913178774e6ff9e7c86192168
       url: https://github.com/golioth/golioth-zephyr-sdk
       west-commands: scripts/west-commands.yml
       import:
@@ -28,7 +28,12 @@ manifest:
 
     - name: golioth-zephyr-boards
       path: app/golioth-boards
-      revision: 807f33254c1747e5d6ab13051efbc5c19f893551
+      revision: 6532ee0a5755bdcd4de95966f027427889443322
       url: git@github.com:golioth/golioth-zephyr-boards.git
+
+    - name: libostentus
+      path: app/src/libostentus
+      revision: main
+      url: git@github.com:golioth/libostentus.git
   self:
     path: app
