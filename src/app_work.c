@@ -472,6 +472,12 @@ void app_work_sensor_read(void) {
 	if (err) {
 		LOG_ERR("Failed to send sensor data to Golioth: %d", err);
 	}
+
+	/* Update any on-device sensor settings that have changed */
+	update_sensor_settings();
+
+	/* Complete any actions requested via RPC */
+	service_rpc_requests();
 }
 
 void app_work_init(struct golioth_client* work_client) {
