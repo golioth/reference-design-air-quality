@@ -16,7 +16,7 @@ int32_t get_loop_delay_s(void);
 int32_t get_scd4x_temperature_offset_s(void);
 uint16_t get_scd4x_altitude_s(void);
 bool get_scd4x_asc_s(void);
-uint32_t get_sps30_cleaning_interval(void);
+uint32_t get_sps30_cleaning_interval_s(void);
 int app_register_settings(struct golioth_client *settings_client);
 
 #endif /* __APP_SETTINGS_H__ */
