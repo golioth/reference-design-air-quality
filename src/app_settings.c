@@ -106,7 +106,6 @@ enum golioth_settings_status on_setting(
 				" m°C", _scd4x_temperature_offset_s);
 
 			update_scd4x_temperature_offset = true;
-			wake_system_thread();
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -136,7 +135,6 @@ enum golioth_settings_status on_setting(
 				_scd4x_altitude_s);
 
 			update_scd4x_altitude = true;
-			wake_system_thread();
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -159,7 +157,6 @@ enum golioth_settings_status on_setting(
 				" to %d m°C", _scd4x_asc_s);
 
 			update_scd4x_asc = true;
-			wake_system_thread();
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -190,7 +187,6 @@ enum golioth_settings_status on_setting(
 				_sps30_cleaning_interval_s);
 
 			update_sps30_cleaning_interval = true;
-			wake_system_thread();
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
