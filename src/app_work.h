@@ -14,6 +14,10 @@ void app_work_sensor_read(void);
  * Each Ostentus slide needs a unique key. You may add additional slides by
  * inserting elements with the name of your choice to this enum.
  */
-// FIXME: typedef enum {} slide_key;
+typedef enum {
+    TEMPERATURE,
+    PRESSURE,
+    HUMIDITY
+} slide_key;
 
 #endif /* __APP_WORK_H__ */

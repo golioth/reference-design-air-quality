@@ -108,14 +108,14 @@ void golioth_connection_led_set(uint8_t state) {
 	/* Turn on Golioth logo LED once connected */
 	gpio_pin_set_dt(&golioth_led, pin_state);
 	/* Change the state of the Golioth LED on Ostentus */
-	// FIXME: led_golioth_set(pin_state);
+	led_golioth_set(pin_state);
 }
 
 /* Set (unset) LED indicators for active internet connection */
 void network_led_set(uint8_t state) {
 	uint8_t pin_state = state ? 1 : 0;
 	/* Change the state of the Internet LED on Ostentus */
-	// FIXME: led_internet_set(pin_state);
+	led_internet_set(pin_state);
 }
 
 void main(void)
@@ -125,10 +125,10 @@ void main(void)
 	LOG_DBG("Started air quality monitor app");
 
 	/* Update Ostentus LEDS using bitmask (Power On)*/
-	// FIXME: led_bitmask(LED_POW);
+	led_bitmask(LED_POW);
 
 	/* Show Golioth Logo on Ostentus ePaper screen */
-	// FIXME: show_splash();
+	show_splash();
 
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
@@ -202,9 +202,13 @@ void main(void)
 	 *  - use the enum in app_work.h to add new keys
 	 *  - values are updated using these keys (see app_work.c)
 	 */
-
+	slide_add(TEMPERATURE, "Temperature", strlen("Temperature"));
+	slide_add(PRESSURE, "Pressure", strlen("Pressure"));
+	slide_add(HUMIDITY, "Humidity", strlen("Humidity"));
+	/* Set the title of the Ostentus summary slide (optional) */
+	summary_title("Air Quality", strlen("Air Quality"));
 	/* Start Ostentus slideshow with 30 second delay between slides */
-	// FIXME: slideshow(30000);
+	slideshow(30000);
 
 	while (true) {
 		app_work_sensor_read();
