@@ -205,6 +205,9 @@ void main(void)
 	slide_add(TEMPERATURE, "Temperature", strlen("Temperature"));
 	slide_add(PRESSURE, "Pressure", strlen("Pressure"));
 	slide_add(HUMIDITY, "Humidity", strlen("Humidity"));
+	slide_add(CO2, "CO2", strlen("CO2"));
+	slide_add(PM2P5, "PM2.5", strlen("PM2.5"));
+	slide_add(PM10P0, "PM10.0", strlen("PM10.0"));
 	/* Set the title of the Ostentus summary slide (optional) */
 	summary_title("Air Quality", strlen("Air Quality"));
 	/* Start Ostentus slideshow with 30 second delay between slides */

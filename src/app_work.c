@@ -477,12 +477,18 @@ void app_work_sensor_read(void) {
 	 *  -values should be sent as strings
 	 *  -use the enum from app_work.h for slide key values
 	 */
-	snprintk(json_buf, sizeof(json_buf), "%d.%d °C", bme280_tem.val1, bme280_tem.val2);
+	snprintk(json_buf, sizeof(json_buf), "%d.%d C", bme280_tem.val1, bme280_tem.val2 / 10000);
 	slide_set(TEMPERATURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d kPa", bme280_pre.val1, bme280_pre.val2);
+	snprintk(json_buf, sizeof(json_buf), "%d.%d kPa", bme280_pre.val1, bme280_pre.val2 / 10000);
 	slide_set(PRESSURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d %%RH", bme280_hum.val1, bme280_hum.val2);
+	snprintk(json_buf, sizeof(json_buf), "%d.%d %%RH", bme280_hum.val1, bme280_hum.val2 / 10000);
 	slide_set(HUMIDITY, json_buf, strlen(json_buf));
+	snprintk(json_buf, sizeof(json_buf), "%d ppm", scd4x_co2.val1);
+	slide_set(CO2, json_buf, strlen(json_buf));
+	snprintk(json_buf, sizeof(json_buf), "%d.%d ug/m^3", sps30_mc_2p5.val1, sps30_mc_2p5.val1 / 10000);
+	slide_set(PM2P5, json_buf, strlen(json_buf));
+	snprintk(json_buf, sizeof(json_buf), "%d.%d ug/m^3", sps30_mc_10p0.val1, sps30_mc_10p0.val1 / 10000);
+	slide_set(PM10P0, json_buf, strlen(json_buf));
 
 	/* Update any on-device sensor settings that have changed */
 	update_sensor_settings();

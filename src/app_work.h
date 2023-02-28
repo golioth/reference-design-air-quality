@@ -17,7 +17,10 @@ void app_work_sensor_read(void);
 typedef enum {
     TEMPERATURE,
     PRESSURE,
-    HUMIDITY
+    HUMIDITY,
+    CO2,
+    PM2P5,
+    PM10P0
 } slide_key;
 
 #endif /* __APP_WORK_H__ */
