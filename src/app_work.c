@@ -18,7 +18,7 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include "sensirion_common.h"
 #include "sensirion_i2c_hal.h"
 #include "scd4x_i2c.h"
-#include "sps30_i2c.h"
+#include "sps30.h"
 
 static struct golioth_client *client;
 const struct device *weather_sensor = DEVICE_DT_GET(DT_NODELABEL(bme280));

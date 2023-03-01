@@ -35,5 +35,20 @@ manifest:
       path: app/src/libostentus
       revision: main
       url: git@github.com:golioth/libostentus.git
+
+    - name: sensirion-embedded-common
+      path: app/external/sensirion/embedded-common
+      revision: 66cf952d54a51b537f4573e7be1a7c4451a84b48
+      url: https://github.com/golioth/sensirion-embedded-common.git
+
+    - name: sensirion-embedded-i2c-scd4x
+      path: app/external/sensirion/embedded-i2c-scd4x
+      revision: fbfd86e8ea371894ae6473c48cf4f425c54360f0
+      url: https://github.com/golioth/sensirion-embedded-i2c-scd4x.git
+
+    - name: sensirion-embedded-sps
+      path: app/external/sensirion/embedded-sps
+      revision: ef781982b917249ebdafd30673b281b7c3f0764a
+      url: https://github.com/golioth/sensirion-embedded-sps.git
   self:
     path: app
