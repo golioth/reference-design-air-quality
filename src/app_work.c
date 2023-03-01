@@ -241,7 +241,7 @@ int sps30_read(struct sps30_measurement *measurement)
 	} else {
 		LOG_DBG("SPS30 exited measurement mode");
 	}
-			
+
 	return err;
 }
 
@@ -271,7 +271,7 @@ int sps30_clean_fan(void)
 			"%d)", err);
 		return err;
 	}
-			
+
 	return err;
 }
 
@@ -401,7 +401,7 @@ void app_work_sensor_read(void) {
 		sps30_mc_10p0, sps30_nc_0p5, sps30_nc_1p0, sps30_nc_2p5,
 		sps30_nc_4p0, sps30_nc_10p0, sps30_typical_particle_size;
 	char json_buf[256];
-	
+
 	/* Update any on-device sensor settings that have changed */
 	update_sensor_settings();
 
@@ -454,14 +454,14 @@ void app_work_sensor_read(void) {
 		bme280_hum.val1, bme280_hum.val2,
 		scd4x_co2.val1, scd4x_co2.val2,
 		sps30_mc_1p0.val1, sps30_mc_1p0.val2,
-		sps30_mc_2p5.val1, sps30_mc_2p5.val2, 
-		sps30_mc_4p0.val1, sps30_mc_4p0.val2, 
-		sps30_mc_10p0.val1, sps30_mc_10p0.val2, 
-		sps30_nc_0p5.val1, sps30_nc_0p5.val2, 
-		sps30_nc_1p0.val1, sps30_nc_1p0.val2, 
-		sps30_nc_2p5.val1, sps30_nc_2p5.val2, 
-		sps30_nc_4p0.val1, sps30_nc_4p0.val2, 
-		sps30_nc_10p0.val1, sps30_nc_10p0.val2, 
+		sps30_mc_2p5.val1, sps30_mc_2p5.val2,
+		sps30_mc_4p0.val1, sps30_mc_4p0.val2,
+		sps30_mc_10p0.val1, sps30_mc_10p0.val2,
+		sps30_nc_0p5.val1, sps30_nc_0p5.val2,
+		sps30_nc_1p0.val1, sps30_nc_1p0.val2,
+		sps30_nc_2p5.val1, sps30_nc_2p5.val2,
+		sps30_nc_4p0.val1, sps30_nc_4p0.val2,
+		sps30_nc_10p0.val1, sps30_nc_10p0.val2,
 		sps30_typical_particle_size.val1,
 		sps30_typical_particle_size.val2);
 
