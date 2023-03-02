@@ -267,7 +267,7 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	sensor_value_from_double(&measurement->typical_particle_size,
 		sps30_meas.typical_particle_size);
 
-	LOG_INF("PM sensor: "
+	LOG_INF("sps30: "
 		"PM1.0=%d.%d μg/m³; PM2.5=%d.%d μg/m³; "
 		"PM4.0=%d.%d μg/m³; PM10.0=%d.%d μg/m³; "
 		"NC0.5=%d.%d #/cm³; NC1.0=%d.%d #/cm³; "
