@@ -14,6 +14,7 @@ zephyr_include_directories(external/sensirion/embedded-sps/sps30-i2c)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/app_rpc.c)
+target_sources(app PRIVATE src/sensors.c)
 target_sources(app PRIVATE src/app_settings.c)
 target_sources(app PRIVATE src/app_state.c)
 target_sources(app PRIVATE src/app_work.c)

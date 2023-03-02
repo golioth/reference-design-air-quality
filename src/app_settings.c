@@ -74,7 +74,7 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_loop_delay_s = (int32_t)value->i64;
-			LOG_INF("Set loop delay to %d seconds", _loop_delay_s);
+			LOG_INF("Set main loop delay to %d seconds", _loop_delay_s);
 
 			wake_system_thread();
 		}

@@ -16,8 +16,7 @@ LOG_MODULE_REGISTER(app_rpc, LOG_LEVEL_DBG);
 #include <zephyr/sys/reboot.h>
 
 #include "main.h"
-
-bool request_sps30_manual_fan_cleaning = false;
+#include "sensors.h"
 
 static void reboot_work_handler(struct k_work *work) {
 	/* Sync longs before reboot */
@@ -36,9 +35,7 @@ K_WORK_DEFINE(reboot_work, reboot_work_handler);
 
 static void clean_pm_sensor_work_handler(struct k_work *work)
 {
-	LOG_INF("PM sensor manual fan cleaning requested via RPC");
-	request_sps30_manual_fan_cleaning = true;
-	wake_system_thread();
+	sps30_clean_fan();
 }
 K_WORK_DEFINE(clean_pm_sensor_work, clean_pm_sensor_work_handler);
 
