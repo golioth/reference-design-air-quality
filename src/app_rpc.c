@@ -35,7 +35,7 @@ K_WORK_DEFINE(reboot_work, reboot_work_handler);
 
 static void clean_pm_sensor_work_handler(struct k_work *work)
 {
-	sps30_clean_fan();
+	sps30_sensor_clean_fan();
 }
 K_WORK_DEFINE(clean_pm_sensor_work, clean_pm_sensor_work_handler);
 
