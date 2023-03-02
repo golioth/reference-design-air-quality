@@ -36,7 +36,7 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 	sensor_channel_get(weather_sensor, SENSOR_CHAN_HUMIDITY,
 		&measurement->humidity);
 
-	LOG_INF("bme280: Temperature=%d.%d °C; Pressure=%d.%d kPa"
+	LOG_INF("bme280: Temperature=%d.%d °C; Pressure=%d.%d kPa;"
 		" Humidity=%d.%d %%RH",
 		measurement->temperature.val1, measurement->temperature.val2,
 		measurement->pressure.val1, measurement->pressure.val2,
