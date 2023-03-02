@@ -10,48 +10,25 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include <net/golioth/settings.h>
 #include "app_settings.h"
 #include "main.h"
+#include "sensors.h"
 
 static int32_t _loop_delay_s = 60;
 
-static int32_t _scd4x_temperature_offset_s = 0;
+static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s = 0;
 static bool _scd4x_asc_s = true;
 static uint32_t _sps30_cleaning_interval_s = 604800;
-
-bool update_scd4x_temperature_offset = true;
-bool update_scd4x_altitude = true;
-bool update_scd4x_asc = true;
-bool update_sps30_cleaning_interval = true;
 
 int32_t get_loop_delay_s(void)
 {
 	return _loop_delay_s;
 }
 
-int32_t get_scd4x_temperature_offset_s(void)
-{
-	return _scd4x_temperature_offset_s;
-}
-
-uint16_t get_scd4x_altitude_s(void)
-{
-	return _scd4x_altitude_s;
-}
-
-bool get_scd4x_asc_s(void)
-{
-	return _scd4x_asc_s;
-}
-
-uint32_t get_sps30_cleaning_interval_s(void)
-{
-	return _sps30_cleaning_interval_s;
-}
-
 enum golioth_settings_status on_setting(
 	const char *key,
 	const struct golioth_settings_value *value)
 {
+	int err;
 	LOG_DBG("Received setting: key = %s, type = %d", key, value->type);
 	if (strcmp(key, "LOOP_DELAY_S") == 0) {
 		/* This setting is expected to be numeric, return an error if
@@ -102,10 +79,9 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_temperature_offset_s = (int32_t)value->i64;
-			LOG_INF("Set SCD4x temperature offset setting to %d"
-				" m°C", _scd4x_temperature_offset_s);
-
-			update_scd4x_temperature_offset = true;
+			err = scd4x_sensor_set_temperature_offset(
+				_scd4x_temperature_offset_s);
+			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -131,10 +107,9 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_altitude_s = (uint16_t)value->i64;
-			LOG_INF("Set SCD4x altitude setting to %d m°C",
+			err = scd4x_sensor_set_sensor_altitude(
 				_scd4x_altitude_s);
-
-			update_scd4x_altitude = true;
+			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -153,10 +128,9 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_asc_s = (bool)value->b;
-			LOG_INF("Set SCD4x automatic self-calibration setting"
-				" to %d m°C", _scd4x_asc_s);
-
-			update_scd4x_asc = true;
+			err = scd4x_sensor_set_automatic_self_calibration(
+				_scd4x_asc_s);
+			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -182,11 +156,9 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_sps30_cleaning_interval_s = (uint32_t)value->i64;
-			LOG_INF("Set SPS30 automatic fan cleaning interval"
-				" setting to %d seconds",
+			err = sps30_sensor_set_fan_auto_cleaning_interval(
 				_sps30_cleaning_interval_s);
-
-			update_sps30_cleaning_interval = true;
+			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}

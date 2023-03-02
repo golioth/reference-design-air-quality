@@ -17,6 +17,7 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #include "app_work.h"
 #include "dfu/app_dfu.h"
 #include "libostentus/libostentus.h"
+#include "sensors.h"
 
 #include <zephyr/drivers/gpio.h>
 
@@ -123,6 +124,24 @@ void main(void)
 	int err;
 
 	LOG_DBG("Started air quality monitor app");
+
+	/* Initialize weather sensor */
+	err = bme280_sensor_init();
+	if (err) {
+		return;
+	}
+
+	/* Initialize CO₂ sensor */
+	err = scd4x_sensor_init();
+	if (err) {
+		return;
+	}
+
+	/* Initialize PM sensor */
+	err = sps30_sensor_init();
+	if (err) {
+		return;
+	}
 
 	/* Update Ostentus LEDS using bitmask (Power On)*/
 	led_bitmask(LED_POW);

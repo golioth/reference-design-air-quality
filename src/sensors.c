@@ -121,6 +121,54 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	return err;
 }
 
+int scd4x_sensor_set_temperature_offset(int32_t t_offset_m_deg_c)
+{
+	int err;
+
+	err = scd4x_set_temperature_offset(t_offset_m_deg_c);
+	if (err) {
+		LOG_ERR("Error setting SCD4x temperature offset (error: %d)",
+			err);
+	} else {
+		LOG_INF("Wrote SCD4x temperature offset (%d m°C) to sensor",
+			t_offset_m_deg_c);
+	}
+
+	return err;
+}
+
+int scd4x_sensor_set_sensor_altitude(int16_t sensor_altitude)
+{
+	int err;
+
+	err = scd4x_set_sensor_altitude(sensor_altitude);
+	if (err) {
+		LOG_ERR("Error setting SCD4x altitude (error: %d)",
+			err);
+	} else {
+		LOG_INF("Wrote SCD4x altitude (%d meters) to sensor",
+			sensor_altitude);
+	}
+
+	return err;
+}
+
+int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
+{
+	int err;
+
+	err = scd4x_set_automatic_self_calibration(asc_enabled);
+	if (err) {
+		LOG_ERR("Error setting SCD4x automatic self-calibration"
+			" (error: %d)", err);
+	} else {
+		LOG_INF("Wrote SCD4x automatic self-calibration setting"
+			" (%d) to sensor", asc_enabled);
+	}
+
+	return err;
+}
+
 int scd4x_sensor_init(void)
 {
 	int err;
@@ -247,6 +295,22 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	return err;
 }
 
+int sps30_sensor_set_fan_auto_cleaning_interval(uint32_t interval_seconds)
+{
+	int err;
+
+	err = sps30_set_fan_auto_cleaning_interval(interval_seconds);
+	if (err) {
+		LOG_ERR("Error setting SPS30 automatic fan cleaning"
+			" interval (error: %d)", err);
+	} else {
+		LOG_INF("Wrote SPS30 automatic fan cleaning interval"
+			" (%d seconds) to sensor", interval_seconds);
+	}
+
+	return err;
+}
+
 int sps30_clean_fan(void)
 {
 	int16_t err;
@@ -318,65 +382,4 @@ int sps30_sensor_init(void)
 	}
 
 	return err;
-}
-
-void update_sensor_settings(void)
-{
-	int err;
-	extern bool update_scd4x_temperature_offset;
-	extern bool update_scd4x_altitude;
-	extern bool update_scd4x_asc;
-	extern bool update_sps30_cleaning_interval;
-
-	if (update_scd4x_temperature_offset) {
-		int32_t offset_m_deg_c = get_scd4x_temperature_offset_s();
-		err = scd4x_set_temperature_offset(offset_m_deg_c);
-		if (err) {
-			LOG_ERR("Error setting SCD4x temperature offset (error:"
-				" %d)", err);
-		} else {
-			LOG_INF("Wrote SCD4x temperature offset (%d m°C) to"
-				" sensor", offset_m_deg_c);
-			update_scd4x_temperature_offset = false;
-		}
-	}
-
-	if (update_scd4x_altitude) {
-		uint16_t altitude = get_scd4x_altitude_s();
-		err = scd4x_set_sensor_altitude(altitude);
-		if (err) {
-			LOG_ERR("Error setting SCD4x altitude (error: %d)",
-				err);
-		} else {
-			LOG_INF("Wrote SCD4x altitude (%d meters) to sensor",
-				altitude);
-			update_scd4x_altitude = false;
-		}
-	}
-
-	if (update_scd4x_asc) {
-		bool asc = get_scd4x_asc_s();
-		err = scd4x_set_automatic_self_calibration(asc);
-		if (err) {
-			LOG_ERR("Error setting SCD4x automatic self-calibration"
-				" (error: %d)", err);
-		} else {
-			LOG_INF("Wrote SCD4x automatic self-calibration setting"
-				" (%d) to sensor", asc);
-			update_scd4x_asc = false;
-		}
-	}
-
-	if (update_sps30_cleaning_interval) {
-		uint32_t interval = get_sps30_cleaning_interval_s();
-		err = sps30_set_fan_auto_cleaning_interval(interval);
-		if (err) {
-			LOG_ERR("Error setting SPS30 automatic fan cleaning"
-				" interval (error: %d)", err);
-		} else {
-			LOG_INF("Wrote SPS30 automatic fan cleaning interval"
-				" (%d seconds) to sensor", interval);
-			update_sps30_cleaning_interval = false;
-		}
-	}
 }

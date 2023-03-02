@@ -52,9 +52,6 @@ void app_work_sensor_read(void) {
 	struct sps30_sensor_measurement sps30_sm;
 	char json_buf[256];
 
-	/* Update any on-device sensor settings that have changed */
-	update_sensor_settings();
-
 	LOG_DBG("Collecting sensor measurements");
 
 	/* Read the weather sensor */
@@ -127,25 +124,5 @@ void app_work_sensor_read(void) {
 }
 
 void app_work_init(struct golioth_client* work_client) {
-	int err;
-
 	client = work_client;
-
-	/* Initialize weather sensor */
-	err = bme280_sensor_init();
-	if (err) {
-		return;
-	}
-
-	/* Initialize CO₂ sensor */
-	err = scd4x_sensor_init();
-	if (err) {
-		return;
-	}
-
-	/* Initialize PM sensor */
-	err = sps30_sensor_init();
-	if (err) {
-		return;
-	}
 }

@@ -7,10 +7,7 @@
 #ifndef __APP_SETTINGS_H__
 #define __APP_SETTINGS_H__
 
-extern bool update_scd4x_temperature_offset;
-extern bool update_scd4x_altitude;
-extern bool update_scd4x_asc;
-extern bool update_sps30_cleaning_interval;
+#include <net/golioth.h>
 
 int32_t get_loop_delay_s(void);
 int32_t get_scd4x_temperature_offset_s(void);
