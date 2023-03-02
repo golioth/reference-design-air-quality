@@ -123,7 +123,7 @@ void main(void)
 {
 	int err;
 
-	LOG_DBG("Started air quality monitor app");
+	LOG_INF("Started air quality monitor app");
 
 	/* Initialize weather sensor */
 	err = bme280_sensor_init();
@@ -159,15 +159,15 @@ void main(void)
 	}
 
 	/* Initialize app state */
-	LOG_DBG("Initializing app state");
+	LOG_INF("Initializing app state");
 	app_state_init(client);
 
 	/* Initialize app work */
-	LOG_DBG("Initializing app work");
+	LOG_INF("Initializing app work");
 	app_work_init(client);
 
 	/* Initialize DFU components */
-	LOG_DBG("Initializing DFU components");
+	LOG_INF("Initializing DFU components");
 	app_dfu_init(client);
 
 	/* Register Golioth on_connect callback */

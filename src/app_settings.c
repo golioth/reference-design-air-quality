@@ -24,11 +24,59 @@ int32_t get_loop_delay_s(void)
 	return _loop_delay_s;
 }
 
+int32_t get_scd4x_temperature_offset_s(void)
+{
+	return _scd4x_temperature_offset_s;
+}
+
+uint16_t get_scd4x_altitude_s(void)
+{
+	return _scd4x_altitude_s;
+}
+
+bool get_scd4x_asc_s(void)
+{
+	return _scd4x_asc_s;
+}
+
+uint32_t get_sps30_cleaning_interval_s(void)
+{
+	return _sps30_cleaning_interval_s;
+}
+
+/* Work items for settings that need to be written to hardware sensors */
+static void scd4x_sensor_set_temperature_offset_work_handler(struct k_work *work)
+{
+	scd4x_sensor_set_temperature_offset(_scd4x_temperature_offset_s);
+}
+K_WORK_DEFINE(scd4x_sensor_set_temperature_offset_work,
+	scd4x_sensor_set_temperature_offset_work_handler);
+
+static void scd4x_sensor_set_sensor_altitude_work_handler(struct k_work *work)
+{
+	scd4x_sensor_set_sensor_altitude(_scd4x_altitude_s);
+}
+K_WORK_DEFINE(scd4x_sensor_set_sensor_altitude_work,
+	scd4x_sensor_set_sensor_altitude_work_handler);
+
+static void scd4x_sensor_set_automatic_self_calibration_work_handler(struct k_work *work)
+{
+	scd4x_sensor_set_automatic_self_calibration(_scd4x_asc_s);
+}
+K_WORK_DEFINE(scd4x_sensor_set_automatic_self_calibration_work,
+	scd4x_sensor_set_automatic_self_calibration_work_handler);
+
+static void sps30_sensor_set_fan_auto_cleaning_interval_work_handler(struct k_work *work)
+{
+	sps30_sensor_set_fan_auto_cleaning_interval(_sps30_cleaning_interval_s);
+}
+K_WORK_DEFINE(sps30_sensor_set_fan_auto_cleaning_interval_work,
+	sps30_sensor_set_fan_auto_cleaning_interval_work_handler);
+
 enum golioth_settings_status on_setting(
 	const char *key,
 	const struct golioth_settings_value *value)
 {
-	int err;
 	LOG_DBG("Received setting: key = %s, type = %d", key, value->type);
 	if (strcmp(key, "LOOP_DELAY_S") == 0) {
 		/* This setting is expected to be numeric, return an error if
@@ -79,9 +127,8 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_temperature_offset_s = (int32_t)value->i64;
-			err = scd4x_sensor_set_temperature_offset(
-				_scd4x_temperature_offset_s);
-			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
+			/* Submit a work item to write this to the sensor */
+			k_work_submit(&scd4x_sensor_set_temperature_offset_work);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -107,9 +154,8 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_altitude_s = (uint16_t)value->i64;
-			err = scd4x_sensor_set_sensor_altitude(
-				_scd4x_altitude_s);
-			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
+			/* Submit a work item to write this to the sensor */
+			k_work_submit(&scd4x_sensor_set_sensor_altitude_work);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -128,9 +174,8 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_scd4x_asc_s = (bool)value->b;
-			err = scd4x_sensor_set_automatic_self_calibration(
-				_scd4x_asc_s);
-			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
+			/* Submit a work item to write this to the sensor */
+			k_work_submit(&scd4x_sensor_set_automatic_self_calibration_work);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -156,9 +201,8 @@ enum golioth_settings_status on_setting(
 		}
 		else {
 			_sps30_cleaning_interval_s = (uint32_t)value->i64;
-			err = sps30_sensor_set_fan_auto_cleaning_interval(
-				_sps30_cleaning_interval_s);
-			if (err) return GOLIOTH_SETTINGS_GENERAL_ERROR;
+			/* Submit a work item to write this to the sensor */
+			k_work_submit(&sps30_sensor_set_fan_auto_cleaning_interval_work);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
