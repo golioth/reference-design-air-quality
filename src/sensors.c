@@ -23,8 +23,6 @@ const struct device *bme280_dev = DEVICE_DT_GET(DT_NODELABEL(bme280));
 
 int bme280_sensor_init(void)
 {
-	int err;
-
 	LOG_DBG("Requesting BME280 mutex lock");
 	k_mutex_lock(&bme280_mutex, K_FOREVER);
 	LOG_DBG("Locked BME280 mutex");
