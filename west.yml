@@ -33,8 +33,8 @@ manifest:
 
     - name: libostentus
       path: app/src/libostentus
-      revision: main
-      url: git@github.com:golioth/libostentus.git
+      revision: 7a946bc71617f7c935a48a1e9c416dfdea5b3ad7
+      url: git@github.com:cdwilson/libostentus.git
 
     - name: sensirion-embedded-common
       path: app/external/sensirion/embedded-common
