@@ -11,8 +11,10 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
 
-#include "sensors.h"
+#include "app_state.h"
+#include "app_settings.h"
 #include "app_work.h"
+#include "sensors.h"
 #include "libostentus/libostentus.h"
 
 static struct golioth_client *client;
@@ -64,6 +66,13 @@ void app_work_sensor_read(void) {
 	err = scd4x_sensor_read(&scd4x_sm);
 	if (err) {
 		return;
+	} else {
+		if (scd4x_sm.co2 >= get_co2_warning_threshold_s()) {
+			set_warning_indicator(1);
+		} else {
+			set_warning_indicator(0);
+		}
+		app_state_update_actual();
 	}
 
 	/* Read the PM sensor */

@@ -12,16 +12,21 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include "main.h"
 #include "sensors.h"
 
-static int32_t _loop_delay_s = 60;
-
+static uint32_t _loop_delay_s = 60;
+static uint32_t _co2_warning_threshold_s = 800;
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s = 0;
 static bool _scd4x_asc_s = true;
 static uint32_t _sps30_cleaning_interval_s = 604800;
 
-int32_t get_loop_delay_s(void)
+uint32_t get_loop_delay_s(void)
 {
 	return _loop_delay_s;
+}
+
+uint32_t get_co2_warning_threshold_s(void)
+{
+	return _co2_warning_threshold_s;
 }
 
 int32_t get_scd4x_temperature_offset_s(void)
@@ -93,15 +98,42 @@ enum golioth_settings_status on_setting(
 		}
 
 		/* Only update if value has changed */
-		if (_loop_delay_s == (int32_t)value->i64) {
+		if (_loop_delay_s == (uint32_t)value->i64) {
 			LOG_DBG("Received LOOP_DELAY_S setting already matches"
 				" local value.");
 		}
 		else {
-			_loop_delay_s = (int32_t)value->i64;
+			_loop_delay_s = (uint32_t)value->i64;
 			LOG_INF("Set main loop delay to %d seconds", _loop_delay_s);
 
 			wake_system_thread();
+		}
+		return GOLIOTH_SETTINGS_SUCCESS;
+	}
+
+	if (strcmp(key, "CO2_WARNING_THRESHOLD") == 0) {
+		/* This setting is expected to be numeric, return an error if
+		it's not */
+		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
+		}
+
+		/* Limit to ppm in the range [0, UINT32_MAX] */
+		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
+			LOG_DBG("Received CO2_WARNING_THRESHOLD setting is"
+				" outside allowed range.");
+			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
+		}
+
+		/* Only update if value has changed */
+		if (_co2_warning_threshold_s == (uint32_t)value->i64) {
+			LOG_DBG("Received CO2_WARNING_THRESHOLD setting already"
+				" matches local value.");
+		}
+		else {
+			_co2_warning_threshold_s = (uint32_t)value->i64;
+			LOG_INF("Set CO₂ warning threshold to %u ppm",
+				_co2_warning_threshold_s);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -113,7 +145,7 @@ enum golioth_settings_status on_setting(
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
-		/* Limit to m°C that fit within INT32_MIN to INT32_MAX */
+		/* Limit to m°C in the range [INT32_MIN, INT32_MAX] */
 		if (value->i64 < INT32_MIN || value->i64 > INT32_MAX) {
 			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting"
 				" is outside allowed range.");
@@ -140,7 +172,7 @@ enum golioth_settings_status on_setting(
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
-		/* Limit to meters that fit within INT16_MIN to INT16_MAX */
+		/* Limit to meters in the range [INT16_MIN, INT16_MAX] */
 		if (value->i64 < INT16_MIN || value->i64 > INT16_MAX) {
 			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting is"
 				" outside allowed range.");
@@ -187,7 +219,7 @@ enum golioth_settings_status on_setting(
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
-		/* Limit to seconds that fit within UINT32_MIN to UINT32_MAX */
+		/* Limit to seconds in the range [UINT32_MIN, UINT32_MAX] */
 		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
 			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL"
 				" setting is outside allowed range.");
