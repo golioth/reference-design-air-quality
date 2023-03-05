@@ -23,10 +23,7 @@ const struct device *bme280_dev = DEVICE_DT_GET(DT_NODELABEL(bme280));
 
 int bme280_sensor_init(void)
 {
-	LOG_DBG("Requesting BME280 mutex lock");
 	k_mutex_lock(&bme280_mutex, K_FOREVER);
-	LOG_DBG("Locked BME280 mutex (lock count: %u)",
-		bme280_mutex.lock_count);
 
 	LOG_INF("Initializing BME280 weather sensor");
 
@@ -34,22 +31,16 @@ int bme280_sensor_init(void)
 		/* No such node, or the node does not have status "okay". */
 		LOG_ERR("Device \"%s\" not found", bme280_dev->name);
 		k_mutex_unlock(&bme280_mutex);
-		LOG_DBG("Unlocked BME280 mutex (lock count: %u)",
-			bme280_mutex.lock_count);
 		return -ENODEV;
 	}
 
 	if (!device_is_ready(bme280_dev)) {
 		LOG_ERR("Device \"%s\" is not ready", bme280_dev->name);
 		k_mutex_unlock(&bme280_mutex);
-		LOG_DBG("Unlocked BME280 mutex (lock count: %u)",
-			bme280_mutex.lock_count);
 		return -ENODEV;
 	}
 
 	k_mutex_unlock(&bme280_mutex);
-	LOG_DBG("Unlocked BME280 mutex (lock count: %u)",
-		bme280_mutex.lock_count);
 
 	return 0;
 }
@@ -58,10 +49,7 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 {
 	int err;
 
-	LOG_DBG("Requesting BME280 mutex lock");
 	k_mutex_lock(&bme280_mutex, K_FOREVER);
-	LOG_DBG("Locked BME280 mutex (lock count: %u)",
-		bme280_mutex.lock_count);
 
 	LOG_INF("Reading BME280 weather sensor");
 
@@ -69,8 +57,6 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 	if (err) {
 		LOG_ERR("Error fetching weather sensor sample: %d", err);
 		k_mutex_unlock(&bme280_mutex);
-		LOG_DBG("Unlocked BME280 mutex (lock count: %u)",
-			bme280_mutex.lock_count);
 		return err;
 	}
 
@@ -88,8 +74,6 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 		measurement->humidity.val1, measurement->humidity.val2);
 
 	k_mutex_unlock(&bme280_mutex);
-	LOG_DBG("Unlocked BME280 mutex (lock count: %u)",
-		bme280_mutex.lock_count);
 
 	return err;
 }
@@ -100,9 +84,7 @@ int scd4x_sensor_init(void)
 	uint16_t serial_0, serial_1, serial_2;
 	struct scd4x_sensor_measurement measurement;
 
-	LOG_DBG("Requesting SCD4x mutex lock");
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
-	LOG_DBG("Locked SCD4x mutex (lock count: %u)", scd4x_mutex.lock_count);
 
 	LOG_INF("Initializing SCD4x CO₂ sensor");
 
@@ -115,8 +97,6 @@ int scd4x_sensor_init(void)
 	if (err) {
 		LOG_ERR("Error %d: SCD4x wakeup failed", err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	}
 
@@ -125,8 +105,6 @@ int scd4x_sensor_init(void)
 		LOG_ERR("Error %d: SCD4x stop periodic measurement failed",
 			err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	}
 
@@ -134,8 +112,6 @@ int scd4x_sensor_init(void)
 	if (err) {
 		LOG_ERR("Error %d: SCD4x reinit failed", err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	}
 
@@ -144,8 +120,6 @@ int scd4x_sensor_init(void)
 	if (err) {
 		LOG_ERR("Cannot read SCD4x serial number (error: %d)", err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	} else {
 		LOG_INF("SCD4x serial number: 0x%04x%04x%04x", serial_0,
@@ -157,8 +131,6 @@ int scd4x_sensor_init(void)
 	err = scd4x_sensor_read(&measurement);
 
 	k_mutex_unlock(&scd4x_mutex);
-	LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-		scd4x_mutex.lock_count);
 
 	return err;
 }
@@ -170,9 +142,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	uint16_t co2_ppm;
 	int32_t temperature_m_deg_c, humidity_m_percent_rh;
 
-	LOG_DBG("Requesting SCD4x mutex lock");
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
-	LOG_DBG("Locked SCD4x mutex (lock count: %u)", scd4x_mutex.lock_count);
 
 	LOG_INF("Reading SCD4x CO₂ sensor (~5 seconds)");
 
@@ -182,8 +152,6 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 		LOG_ERR("Error entering SCD4x single-shot measurement mode"
 			" (error: %d)", err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	}
 
@@ -198,8 +166,6 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 			LOG_ERR("Error reading SCD4x data ready status flag: "
 				"%d", err);
 			k_mutex_unlock(&scd4x_mutex);
-			LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-				scd4x_mutex.lock_count);
 			return err;
 		}
 
@@ -212,14 +178,10 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	if (err) {
 		LOG_ERR("Error reading SCD4x measurement: %d", err);
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	} else if (co2_ppm == 0) {
 		LOG_ERR("Invalid SCD4x measurement sample");
 		k_mutex_unlock(&scd4x_mutex);
-		LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-			scd4x_mutex.lock_count);
 		return err;
 	}
 
@@ -235,10 +197,6 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 		measurement->humidity.val1, measurement->humidity.val2);
 
 	k_mutex_unlock(&scd4x_mutex);
-	LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-		scd4x_mutex.lock_count);
-
-	k_mutex_unlock(&scd4x_mutex);
 
 	return err;
 }
@@ -247,9 +205,7 @@ int scd4x_sensor_set_temperature_offset(int32_t t_offset_m_deg_c)
 {
 	int err;
 
-	LOG_DBG("Requesting SCD4x mutex lock");
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
-	LOG_DBG("Locked SCD4x mutex (lock count: %u)", scd4x_mutex.lock_count);
 
 	err = scd4x_set_temperature_offset(t_offset_m_deg_c);
 	if (err) {
@@ -261,8 +217,6 @@ int scd4x_sensor_set_temperature_offset(int32_t t_offset_m_deg_c)
 	}
 
 	k_mutex_unlock(&scd4x_mutex);
-	LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-		scd4x_mutex.lock_count);
 
 	return err;
 }
@@ -271,9 +225,7 @@ int scd4x_sensor_set_sensor_altitude(int16_t sensor_altitude)
 {
 	int err;
 
-	LOG_DBG("Requesting SCD4x mutex lock");
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
-	LOG_DBG("Locked SCD4x mutex (lock count: %u)", scd4x_mutex.lock_count);
 
 	err = scd4x_set_sensor_altitude(sensor_altitude);
 	if (err) {
@@ -285,8 +237,6 @@ int scd4x_sensor_set_sensor_altitude(int16_t sensor_altitude)
 	}
 
 	k_mutex_unlock(&scd4x_mutex);
-	LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-		scd4x_mutex.lock_count);
 
 	return err;
 }
@@ -295,9 +245,7 @@ int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
 {
 	int err;
 
-	LOG_DBG("Requesting SCD4x mutex lock");
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
-	LOG_DBG("Locked SCD4x mutex (lock count: %u)", scd4x_mutex.lock_count);
 
 	err = scd4x_set_automatic_self_calibration(asc_enabled);
 	if (err) {
@@ -312,8 +260,6 @@ int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
 	}
 
 	k_mutex_unlock(&scd4x_mutex);
-	LOG_DBG("Unlocked SCD4x mutex (lock count: %u)",
-		scd4x_mutex.lock_count);
 
 	return err;
 }
@@ -325,9 +271,7 @@ int sps30_sensor_init(void)
 	uint8_t fw_minor;
 	char serial_number[SPS30_MAX_SERIAL_LEN];
 
-	LOG_DBG("Requesting SPS30 mutex lock");
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
-	LOG_DBG("Locked SPS30 mutex (lock count: %u)", sps30_mutex.lock_count);
 
 	LOG_INF("Initializing SPS30 PM sensor");
 
@@ -335,8 +279,6 @@ int sps30_sensor_init(void)
 	if (err) {
 		LOG_ERR("SPS30 sensor reset failed");
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 		}
 	sensirion_i2c_hal_sleep_usec(SPS30_RESET_DELAY_USEC);
@@ -345,8 +287,6 @@ int sps30_sensor_init(void)
 	if (err) {
 		LOG_ERR("SPS30 sensor probing failed");
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
@@ -355,8 +295,6 @@ int sps30_sensor_init(void)
 		LOG_ERR("Error reading SPS30 firmware version (error: %d)",
 			err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	} else {
 		LOG_DBG("SPS30 firmware version: %u.%u", fw_major, fw_minor);
@@ -366,16 +304,12 @@ int sps30_sensor_init(void)
 	if (err) {
 		LOG_ERR("Error reading SPS30 serial number (error: %d)", err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	} else {
 		LOG_DBG("SPS30 serial number: %s", serial_number);
 	}
 
 	k_mutex_unlock(&sps30_mutex);
-	LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-		sps30_mutex.lock_count);
 
 	return err;
 }
@@ -386,9 +320,7 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	int16_t data_ready_flag = 0;
 	struct sps30_measurement sps30_meas;
 
-	LOG_DBG("Requesting SPS30 mutex lock");
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
-	LOG_DBG("Locked SPS30 mutex (lock count: %u)", sps30_mutex.lock_count);
 
 	LOG_INF("Reading SPS30 PM sensor (~1 second)");
 
@@ -397,8 +329,6 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
 			err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
@@ -413,8 +343,6 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 			LOG_ERR("Error reading SPS30 data ready status flag: "
 				"%d", err);
 			k_mutex_unlock(&sps30_mutex);
-			LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-				sps30_mutex.lock_count);
 			return err;
 		}
 
@@ -425,8 +353,6 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	if (err) {
 		LOG_ERR("Error reading SPS30 measurement: %d", err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
@@ -465,14 +391,10 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		LOG_ERR("Error exiting SPS30 measurement mode (error: "
 			"%d)", err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
 	k_mutex_unlock(&sps30_mutex);
-	LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-		sps30_mutex.lock_count);
 
 	return err;
 }
@@ -481,9 +403,7 @@ int sps30_sensor_set_fan_auto_cleaning_interval(uint32_t interval_seconds)
 {
 	int err;
 
-	LOG_DBG("Requesting SPS30 mutex lock");
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
-	LOG_DBG("Locked SPS30 mutex (lock count: %u)", sps30_mutex.lock_count);
 
 	err = sps30_set_fan_auto_cleaning_interval(interval_seconds);
 	if (err) {
@@ -495,8 +415,6 @@ int sps30_sensor_set_fan_auto_cleaning_interval(uint32_t interval_seconds)
 	}
 
 	k_mutex_unlock(&sps30_mutex);
-	LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-		sps30_mutex.lock_count);
 
 	return err;
 }
@@ -505,9 +423,7 @@ int sps30_sensor_clean_fan(void)
 {
 	int16_t err;
 
-	LOG_DBG("Requesting SPS30 mutex lock");
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
-	LOG_DBG("Locked SPS30 mutex (lock count: %u)", sps30_mutex.lock_count);
 
 	LOG_INF("Cleaning SPS30 PM sensor fan (~10 seconds)");
 
@@ -516,8 +432,6 @@ int sps30_sensor_clean_fan(void)
 		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
 			err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
@@ -525,8 +439,6 @@ int sps30_sensor_clean_fan(void)
 	if (err) {
 		LOG_ERR("Error starting SPS30 manual fan clearing: %d", err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
@@ -537,14 +449,10 @@ int sps30_sensor_clean_fan(void)
 		LOG_ERR("Error exiting SPS30 measurement mode (error: "
 			"%d)", err);
 		k_mutex_unlock(&sps30_mutex);
-		LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-			sps30_mutex.lock_count);
 		return err;
 	}
 
 	k_mutex_unlock(&sps30_mutex);
-	LOG_DBG("Unlocked SPS30 mutex (lock count: %u)",
-		sps30_mutex.lock_count);
 
 	return err;
 }
