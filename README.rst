@@ -64,6 +64,7 @@ functionality on this Reference Design.
 
    $ (.venv) west build -b aludel_mini_v1_sparkfun9160_ns app -- -DCONFIG_MCUBOOT_IMAGE_VERSION=\"<your.semantic.version>\"
    $ (.venv) west flash
+   $ (.venv) nrfjprog -r
 
 Configure PSK-ID and PSK using the device shell based on your Golioth
 credentials and reboot:
@@ -78,9 +79,72 @@ Golioth Features
 ****************
 
 This app currently implements Over-the-Air (OTA) firmware updates, Settings
-Service, Logging, and RPC. To adjust the delay between hello
-messages, set a ``LOOP_DELAY_S`` key with a interger value (seconds) in the
-Device Settings menu of the `Golioth Console`_.
+Service, Logging, and RPC.
+
+Settings Service
+================
+
+The following settings should be set in the Device Settings menu of the
+`Golioth Console`_.
+
+``LOOP_DELAY_S``
+   Adjusts the delay between sensor readings. Set to an integer value (seconds).
+
+   Default value is ``60`` seconds.
+
+``CO2_WARNING_THRESHOLD``
+   Adjusts the warning threshold for CO₂ levels. Set to an integer value (ppm).
+
+   Default value is ``800`` ppm.
+
+``CO2_SENSOR_TEMPERATURE_OFFSET``
+   Adjusts the temperature offset setting for the SCD4x CO₂ sensor. Set to an
+   integer value (milli °C).
+
+   Default value is ``0`` m°C.
+
+``CO2_SENSOR_ALTITUDE``
+   Adjusts the altitude setting for the SCD4x CO₂ sensor. Set to an integer
+   value(meters above sea level).
+
+   Default value is ``0`` meters.
+
+``CO2_SENSOR_ASC_ENABLE``
+   Enables or disables the automatic self-calibration setting for the SCD4x CO₂
+   sensor. Set to a boolean value.
+
+   Default value is ``true``.
+
+``PM_SENSOR_AUTO_CLEANING_INTERVAL``
+   Adjusts the automatic fan cleaning interval setting for the SPS30 particulate
+   matter sensor. Set to an integer value (seconds).
+
+   Default value is ``604800`` seconds (168 hours or 1 week).
+
+Remote Procedure Call (RPC) Service
+===================================
+
+The following RPCs can be initiated in the Remote Procedure Call menu of the
+`Golioth Console`_.
+
+``reboot``
+   Reboot the system.
+
+``set_log_level``
+   Set the log level.
+
+   The method takes a single parameter which can be one of the following integer
+   values:
+
+   * ``0``: ``LOG_LEVEL_NONE``
+   * ``1``: ``LOG_LEVEL_ERR``
+   * ``2``: ``LOG_LEVEL_WRN``
+   * ``3``: ``LOG_LEVEL_INF``
+   * ``4``: ``LOG_LEVEL_DBG``
+
+``clean_pm_sensor``
+   Initiate the SPS30 particulate matter fan-cleaning procedure manually. The
+   fan cleaning procedure takes approximately 10s to complete.
 
 .. _Golioth Console: https://console.golioth.io
 .. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards

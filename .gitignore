@@ -4,3 +4,5 @@ build*/
 credentials.conf
 __pycache__/
 golioth-boards
+libostentus
+external

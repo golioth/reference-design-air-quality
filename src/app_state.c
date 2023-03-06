@@ -13,16 +13,20 @@ LOG_MODULE_REGISTER(app_state, LOG_LEVEL_DBG);
 
 #include "app_state.h"
 #include "app_work.h"
+#include "libostentus/libostentus.h"
 
-#define DEVICE_STATE_FMT "{\"example_int0\":%d,\"example_int1\":%d}"
+#define DEVICE_STATE_FMT "{\"warning_indicator\":%d}"
 
-uint32_t _example_int0 = 0;
-uint32_t _example_int1 = 1;
+uint32_t warning_indicator = 0;
 
 static struct golioth_client *client;
 
-static K_SEM_DEFINE(reset_desired, 0, 1);
 static K_SEM_DEFINE(update_actual, 0, 1);
+
+void set_warning_indicator(uint32_t value)
+{
+	warning_indicator = value;
+}
 
 static int async_handler(struct golioth_req_rsp *rsp)
 {
@@ -32,20 +36,23 @@ static int async_handler(struct golioth_req_rsp *rsp)
 	}
 
 	LOG_DBG("State successfully set");
+	led_user_set(warning_indicator ? 1 : 0);
 
 	return 0;
 }
 
 void app_state_init(struct golioth_client* state_client) {
 	client = state_client;
-	app_state_update_actual();
-	k_sem_give(&reset_desired);
 	k_sem_give(&update_actual);
 }
 
-static void reset_desired_work_handler(struct k_work *work) {
+static void reset_desired_state(void) {
+	LOG_INF("Resetting \"%s\" LightDB State endpoint to defaults.",
+			APP_STATE_DESIRED_ENDP
+			);
+
 	char sbuf[strlen(DEVICE_STATE_FMT)+8]; /* small bit of extra space */
-	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, -1, -1);
+	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, -1);
 
 	int err;
 	err = golioth_lightdb_set_cb(client, APP_STATE_DESIRED_ENDP,
@@ -54,15 +61,12 @@ static void reset_desired_work_handler(struct k_work *work) {
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
-	k_sem_give(&reset_desired);
 }
 
-K_WORK_DEFINE(reset_desired_work, reset_desired_work_handler);
-
-static void update_actual_state_work_handler(struct k_work *work) {
+void app_state_update_actual(void) {
 
 	char sbuf[strlen(DEVICE_STATE_FMT)+8]; /* small bit of extra space */
-	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, _example_int0, _example_int1);
+	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, warning_indicator);
 
 	int err;
 	err = golioth_lightdb_set_cb(client, APP_STATE_ACTUAL_ENDP,
@@ -70,27 +74,6 @@ static void update_actual_state_work_handler(struct k_work *work) {
 			async_handler, NULL);
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
-	}
-	k_sem_give(&update_actual);
-}
-
-K_WORK_DEFINE(update_actual_state_work, update_actual_state_work_handler);
-
-void app_state_observe(void) {
-	int err = golioth_lightdb_observe_cb(client, APP_STATE_DESIRED_ENDP,
-			GOLIOTH_CONTENT_FORMAT_APP_JSON, app_state_desired_handler, NULL);
-	if (err) {
-	   LOG_WRN("failed to observe lightdb path: %d", err);
-	}
-
-	// This will run when we first connect so update the actual state of the
-	// device with the Golioth servers.
-	app_state_update_actual();
-}
-
-void app_state_update_actual(void) {
-	if (k_sem_take(&update_actual, K_NO_WAIT) == 0) {
-		k_work_submit(&update_actual_state_work);
 	}
 }
 
@@ -109,42 +92,26 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp) {
 			&parsed_state);
 
 	if (ret < 0) {
-		LOG_ERR("Error parsing desired values: %d", -1);
-		k_work_submit(&reset_desired_work);
+		LOG_ERR("Error parsing desired values: %d", ret);
+		reset_desired_state();
 		return 0;
 	}
 
 	uint8_t desired_processed_count = 0;
 	uint8_t state_change_count = 0;
 	if (ret & 1<<0) {
-		// Process example_int0
-		if ((parsed_state.example_int0 >= 0) && (parsed_state.example_int0 < 10000)) {
-			LOG_DBG("Validated desired example_int0 value: %d", parsed_state.example_int0);
-			_example_int0 = parsed_state.example_int0;
+		// Process warning_indicator
+		if ((parsed_state.warning_indicator == 0) || (parsed_state.warning_indicator == 1)) {
+			LOG_DBG("Validated desired warning_indicator value: %d", parsed_state.warning_indicator);
+			warning_indicator = parsed_state.warning_indicator;
 			++desired_processed_count;
 			++state_change_count;
 		}
-		else if (parsed_state.example_int0 == -1) {
-			LOG_DBG("No change requested for example_int0");
+		else if (parsed_state.warning_indicator == -1) {
+			LOG_DBG("No change requested for warning_indicator");
 		}
 		else {
-			LOG_ERR("Invalid desired example_int0 value: %d", parsed_state.example_int0);
-			++desired_processed_count;
-		}
-	}
-	if (ret & 1<<1) {
-		// Process example_int1
-		if ((parsed_state.example_int1 >= 0) && (parsed_state.example_int1 < 10000)) {
-			LOG_DBG("Validated desired example_int1 value: %d", parsed_state.example_int1);
-			_example_int1 = parsed_state.example_int1;
-			++desired_processed_count;
-			++state_change_count;
-		}
-		else if (parsed_state.example_int1 == -1) {
-			LOG_DBG("No change requested for example_int1");
-		}
-		else {
-			LOG_ERR("Invalid desired example_int1 value: %d", parsed_state.example_int1);
+			LOG_ERR("Invalid desired warning_indicator value: %d", parsed_state.warning_indicator);
 			++desired_processed_count;
 		}
 	}
@@ -156,10 +123,22 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp) {
 	if (desired_processed_count) {
 		// We processed some desired changes to return these to -1 on the server
 		// to indicate the desired values were received.
-		if (k_sem_take(&reset_desired, K_NO_WAIT) == 0) {
-			k_work_submit(&reset_desired_work);
-		}
+		reset_desired_state();
+	}
+	return 0;
+}
+
+void app_state_observe(void) {
+	int err = golioth_lightdb_observe_cb(client, APP_STATE_DESIRED_ENDP,
+			GOLIOTH_CONTENT_FORMAT_APP_JSON, app_state_desired_handler, NULL);
+	if (err) {
+	   LOG_WRN("failed to observe lightdb path: %d", err);
 	}
 
-	return 0;
+	// This will only run when we first connect. It updates the actual state of
+	// the device with the Golioth servers. Future updates will be sent whenever
+	// changes occur.
+	if (k_sem_take(&update_actual, K_NO_WAIT) == 0) {
+		app_state_update_actual();
+	}
 }

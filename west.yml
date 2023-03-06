@@ -4,7 +4,7 @@ manifest:
   projects:
     - name: golioth
       path: modules/lib/golioth
-      revision: v0.5.0
+      revision: a5a177d8cc9d49b913178774e6ff9e7c86192168
       url: https://github.com/golioth/golioth-zephyr-sdk
       west-commands: scripts/west-commands.yml
       import:
@@ -28,7 +28,27 @@ manifest:
 
     - name: golioth-zephyr-boards
       path: app/golioth-boards
-      revision: 807f33254c1747e5d6ab13051efbc5c19f893551
+      revision: 6532ee0a5755bdcd4de95966f027427889443322
       url: git@github.com:golioth/golioth-zephyr-boards.git
+
+    - name: libostentus
+      path: app/src/libostentus
+      revision: 7a946bc71617f7c935a48a1e9c416dfdea5b3ad7
+      url: git@github.com:cdwilson/libostentus.git
+
+    - name: sensirion-embedded-common
+      path: app/external/sensirion/embedded-common
+      revision: 66cf952d54a51b537f4573e7be1a7c4451a84b48
+      url: https://github.com/golioth/sensirion-embedded-common.git
+
+    - name: sensirion-embedded-i2c-scd4x
+      path: app/external/sensirion/embedded-i2c-scd4x
+      revision: fbfd86e8ea371894ae6473c48cf4f425c54360f0
+      url: https://github.com/golioth/sensirion-embedded-i2c-scd4x.git
+
+    - name: sensirion-embedded-sps
+      path: app/external/sensirion/embedded-sps
+      revision: ef781982b917249ebdafd30673b281b7c3f0764a
+      url: https://github.com/golioth/sensirion-embedded-sps.git
   self:
     path: app
