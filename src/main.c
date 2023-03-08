@@ -146,8 +146,8 @@ void main(void)
 		return;
 	}
 
-	/* Update Ostentus LEDS using bitmask (Power On)*/
-	led_bitmask(LED_POW);
+	/* Update Ostentus LEDS using bitmask (Power On and Battery)*/
+	led_bitmask(LED_POW | LED_BAT);
 
 	/* Show Golioth Logo on Ostentus ePaper screen */
 	show_splash();
