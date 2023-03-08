@@ -13,7 +13,6 @@ LOG_MODULE_REGISTER(app_state, LOG_LEVEL_DBG);
 
 #include "app_state.h"
 #include "app_work.h"
-#include "libostentus/libostentus.h"
 
 #define DEVICE_STATE_FMT "{\"warning_indicator\":%d}"
 
@@ -36,7 +35,6 @@ static int async_handler(struct golioth_req_rsp *rsp)
 	}
 
 	LOG_DBG("State successfully set");
-	led_user_set(warning_indicator ? 1 : 0);
 
 	return 0;
 }

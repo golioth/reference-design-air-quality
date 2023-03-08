@@ -126,7 +126,7 @@ void main(void)
 {
 	int err;
 
-	LOG_INF("Started air quality monitor app");
+	LOG_INF("Started air quality monitor app FIX RESET");
 
 	/* Initialize weather sensor */
 	err = bme280_sensor_init();
