@@ -15,6 +15,7 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include "app_settings.h"
 #include "app_work.h"
 #include "sensors.h"
+#include "battery.h"
 #include "libostentus/libostentus.h"
 
 static struct golioth_client *client;
@@ -34,7 +35,28 @@ static struct golioth_client *client;
 \"nc_2p5\":%d.%d,\
 \"nc_4p0\":%d.%d,\
 \"nc_10p0\":%d.%d,\
-\"tps\":%d.%d}"
+\"tps\":%d.%d,\
+\"batt_v\":%d.%d,\
+\"batt_lvl\":%d.%d}"
+
+/* Borrowed from samples/boards/nrf/battery/main.c */
+static const struct battery_level_point batt_levels[] = {
+	/* "Curve" here eyeballed from captured data for the [Adafruit
+	 * 3.7v 2000 mAh](https://www.adafruit.com/product/2011) LIPO
+	 * under full load that started with a charge of 3.96 V and
+	 * dropped about linearly to 3.58 V over 15 hours.  It then
+	 * dropped rapidly to 3.10 V over one hour, at which point it
+	 * stopped transmitting.
+	 *
+	 * Based on eyeball comparisons we'll say that 15/16 of life
+	 * goes between 3.95 and 3.55 V, and 1/16 goes between 3.55 V
+	 * and 3.1 V.
+	 */
+
+	{ 10000, 3950 },
+	{ 625, 3550 },
+	{ 0, 3100 },
+};
 
 /* Callback for LightDB Stream */
 static int async_error_handler(struct golioth_req_rsp *rsp) {
@@ -49,10 +71,41 @@ static int async_error_handler(struct golioth_req_rsp *rsp) {
 /* Do all of your work here! */
 void app_work_sensor_read(void) {
 	int err;
+	struct sensor_value batt_v = {0, 0};
+	struct sensor_value batt_lvl = {0, 0};
 	struct bme280_sensor_measurement bme280_sm;
 	struct scd4x_sensor_measurement scd4x_sm;
 	struct sps30_sensor_measurement sps30_sm;
-	char json_buf[256];
+	char json_buf[512];
+
+	LOG_DBG("Collecting battery measurements");
+
+	/* Turn on the voltage divider circuit */
+	err = battery_measure_enable(true);
+	if (err) {
+		LOG_ERR("Failed to enable battery measurement power: %d", err);
+		return;
+	}
+
+	/* Read the battery voltage */
+	int batt_mV = battery_sample();
+	if (batt_mV < 0) {
+		LOG_ERR("Failed to read battery voltage: %d", batt_mV);
+		return;
+	}
+
+	/* Turn off the voltage divider circuit */
+	err = battery_measure_enable(false);
+	if (err) {
+		LOG_ERR("Failed to disable battery measurement power: %d", err);
+		return;
+	}
+
+	sensor_value_from_double(&batt_v, batt_mV / 1000.0);
+	sensor_value_from_double(&batt_lvl, battery_level_pptt(batt_mV,
+		batt_levels) / 100.0);
+	LOG_INF("Battery measurement: voltage=%d.%d V, level=%d.%d",
+		batt_v.val1, batt_v.val2, batt_lvl.val1, batt_lvl.val2);
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -99,7 +152,8 @@ void app_work_sensor_read(void) {
 		sps30_sm.nc_4p0.val1, sps30_sm.nc_4p0.val2,
 		sps30_sm.nc_10p0.val1, sps30_sm.nc_10p0.val2,
 		sps30_sm.typical_particle_size.val1,
-		sps30_sm.typical_particle_size.val2);
+		sps30_sm.typical_particle_size.val2,
+		batt_v.val1, batt_v.val2, batt_lvl.val1, batt_lvl.val2);
 
 	err = golioth_stream_push_cb(client, "sensor",
 		GOLIOTH_CONTENT_FORMAT_APP_JSON,
