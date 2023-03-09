@@ -39,6 +39,12 @@ static void clean_pm_sensor_work_handler(struct k_work *work)
 }
 K_WORK_DEFINE(clean_pm_sensor_work, clean_pm_sensor_work_handler);
 
+static void reset_pm_sensor_work_handler(struct k_work *work)
+{
+	sps30_sensor_init();
+}
+K_WORK_DEFINE(reset_pm_sensor_work, reset_pm_sensor_work_handler);
+
 static enum golioth_rpc_status on_set_log_level(
 	QCBORDecodeContext *request_params_array,
 	QCBOREncodeContext *response_detail_map,
@@ -100,6 +106,16 @@ static enum golioth_rpc_status on_clean_pm_sensor(
 	return GOLIOTH_RPC_OK;
 }
 
+static enum golioth_rpc_status on_reset_pm_sensor(
+	QCBORDecodeContext *request_params_array,
+	QCBOREncodeContext *response_detail_map,
+	void *callback_arg)
+{
+	k_work_submit(&reset_pm_sensor_work);
+
+	return GOLIOTH_RPC_OK;
+}
+
 static void rpc_log_if_register_failure(int err) {
 	if (err) {
 		LOG_ERR("Failed to register RPC: %d", err);
@@ -118,6 +134,9 @@ int app_register_rpc(struct golioth_client *rpc_client) {
 
 	err = golioth_rpc_register(rpc_client, "clean_pm_sensor",
 		on_clean_pm_sensor, NULL);
+
+	err = golioth_rpc_register(rpc_client, "reset_pm_sensor",
+		on_reset_pm_sensor, NULL);
 
 	return err;
 }

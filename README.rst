@@ -145,5 +145,8 @@ The following RPCs can be initiated in the Remote Procedure Call menu of the
    Initiate the SPS30 particulate matter fan-cleaning procedure manually. The
    fan cleaning procedure takes approximately 10s to complete.
 
+``reset_pm_sensor``
+   Reset the SPS30 particulate matter sensor.
+
 .. _Golioth Console: https://console.golioth.io
 .. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
