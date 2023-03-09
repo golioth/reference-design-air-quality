@@ -23,24 +23,18 @@ const struct device *bme280_dev = DEVICE_DT_GET(DT_NODELABEL(bme280));
 
 int bme280_sensor_init(void)
 {
-	k_mutex_lock(&bme280_mutex, K_FOREVER);
-
 	LOG_INF("Initializing BME280 weather sensor");
 
 	if (bme280_dev == NULL) {
 		/* No such node, or the node does not have status "okay". */
 		LOG_ERR("Device \"%s\" not found", bme280_dev->name);
-		k_mutex_unlock(&bme280_mutex);
 		return -ENODEV;
 	}
 
 	if (!device_is_ready(bme280_dev)) {
 		LOG_ERR("Device \"%s\" is not ready", bme280_dev->name);
-		k_mutex_unlock(&bme280_mutex);
 		return -ENODEV;
 	}
-
-	k_mutex_unlock(&bme280_mutex);
 
 	return 0;
 }
@@ -281,7 +275,7 @@ int sps30_sensor_init(void)
 		LOG_ERR("SPS30 sensor reset failed");
 		k_mutex_unlock(&sps30_mutex);
 		return err;
-		}
+	}
 	sensirion_i2c_hal_sleep_usec(SPS30_RESET_DELAY_USEC);
 
 	int tries = 10;
