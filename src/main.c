@@ -126,7 +126,22 @@ void main(void)
 {
 	int err;
 
+	/* Get system thread id so loop delay change event can wake main */
+	_system_thread = k_current_get();
+
 	LOG_INF("Started air quality monitor app");
+
+	/* Update Ostentus LEDS using bitmask (Power On and Battery)*/
+	led_bitmask(LED_POW | LED_BAT);
+
+	/* Show Golioth Logo on Ostentus ePaper screen */
+	show_splash();
+
+	/* Initialize Golioth logo LED */
+	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
+	if (err) {
+		LOG_ERR("Unable to configure LED for Golioth Logo");
+	}
 
 	/* Initialize weather sensor */
 	err = bme280_sensor_init();
@@ -144,21 +159,6 @@ void main(void)
 	err = sps30_sensor_init();
 	if (err) {
 		return;
-	}
-
-	/* Update Ostentus LEDS using bitmask (Power On and Battery)*/
-	led_bitmask(LED_POW | LED_BAT);
-
-	/* Show Golioth Logo on Ostentus ePaper screen */
-	show_splash();
-
-	/* Get system thread id so loop delay change event can wake main */
-	_system_thread = k_current_get();
-
-	/* Initialize Golioth logo LED */
-	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
-	if (err) {
-		LOG_ERR("Unable to configure LED for Golioth Logo");
 	}
 
 	/* Initialize app state */
