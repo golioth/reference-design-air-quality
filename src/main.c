@@ -201,6 +201,22 @@ void main(void)
 	gpio_init_callback(&button_cb_data, button_pressed, BIT(user_btn.pin));
 	gpio_add_callback(user_btn.port, &button_cb_data);
 
+	/* Set up a slideshow on Ostentus
+	 *  - add up to 256 slides
+	 *  - use the enum in app_work.h to add new keys
+	 *  - values are updated using these keys (see app_work.c)
+	 */
+	slide_add(TEMPERATURE, "Temperature", strlen("Temperature"));
+	slide_add(PRESSURE, "Pressure", strlen("Pressure"));
+	slide_add(HUMIDITY, "Humidity", strlen("Humidity"));
+	slide_add(CO2, "CO2", strlen("CO2"));
+	slide_add(PM2P5, "PM2.5", strlen("PM2.5"));
+	slide_add(PM10P0, "PM10.0", strlen("PM10.0"));
+	/* Set the title of the Ostentus summary slide (optional) */
+	summary_title("Air Quality", strlen("Air Quality"));
+	/* Start Ostentus slideshow with 30 second delay between slides */
+	slideshow(30000);
+
 	/* Initialize weather sensor */
 	err = bme280_sensor_init();
 	if (err) {
@@ -218,22 +234,6 @@ void main(void)
 	if (err) {
 		return;
 	}
-
-	/* Set up a slideshow on Ostentus
-	 *  - add up to 256 slides
-	 *  - use the enum in app_work.h to add new keys
-	 *  - values are updated using these keys (see app_work.c)
-	 */
-	slide_add(TEMPERATURE, "Temperature", strlen("Temperature"));
-	slide_add(PRESSURE, "Pressure", strlen("Pressure"));
-	slide_add(HUMIDITY, "Humidity", strlen("Humidity"));
-	slide_add(CO2, "CO2", strlen("CO2"));
-	slide_add(PM2P5, "PM2.5", strlen("PM2.5"));
-	slide_add(PM10P0, "PM10.0", strlen("PM10.0"));
-	/* Set the title of the Ostentus summary slide (optional) */
-	summary_title("Air Quality", strlen("Air Quality"));
-	/* Start Ostentus slideshow with 30 second delay between slides */
-	slideshow(30000);
 
 	while (true) {
 		if (k_sem_take(&dfu_status_update, K_NO_WAIT) == 0) {
