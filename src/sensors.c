@@ -67,7 +67,7 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 	sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY,
 		&measurement->humidity);
 
-	LOG_INF("bme280: Temperature=%d.%d °C; Pressure=%d.%d kPa;"
+	LOG_INF("bme280: Temperature=%d.%d °C, Pressure=%d.%d kPa,"
 		" Humidity=%d.%d %%RH",
 		measurement->temperature.val1, measurement->temperature.val2,
 		measurement->pressure.val1, measurement->pressure.val2,
@@ -144,7 +144,8 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
 
-	LOG_INF("Reading SCD4x CO₂ sensor (~5 seconds)");
+	LOG_INF("Reading SCD4x CO₂ sensor (~%d seconds)",
+		SCD4X_MEASUREMENT_DURATION_USEC / 1000000);
 
 	/* Request a single-shot measurement */
 	err = scd4x_measure_single_shot();
@@ -191,7 +192,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	sensor_value_from_double(&measurement->humidity,
 		humidity_m_percent_rh / 1000.0);
 
-	LOG_INF("scd4x: CO₂=%u ppm; Temperature=%d.%d °C;"
+	LOG_INF("scd4x: CO₂=%u ppm, Temperature=%d.%d °C,"
 		" Humidity=%d.%d %%RH", measurement->co2,
 		measurement->temperature.val1, measurement->temperature.val2,
 		measurement->humidity.val1, measurement->humidity.val2);
@@ -273,7 +274,7 @@ int sps30_sensor_init(void)
 
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
 
-	LOG_INF("Initializing SPS30 PM sensor");
+	LOG_INF("Initializing SPS30 PM sensor (~30 seconds)");
 
 	err = sps30_reset();
 	if (err) {
@@ -283,7 +284,17 @@ int sps30_sensor_init(void)
 		}
 	sensirion_i2c_hal_sleep_usec(SPS30_RESET_DELAY_USEC);
 
-	err = sps30_probe();
+	int tries = 10;
+	while (tries > 0) {
+		LOG_DBG("Probing for SPS30 sensor");
+		err = sps30_probe();
+		if (err == 0) {
+			break;
+		}
+		tries--;
+		/* Sleep 1s and try again */
+		sensirion_i2c_hal_sleep_usec(1000000);
+	}
 	if (err) {
 		LOG_ERR("SPS30 sensor probing failed");
 		k_mutex_unlock(&sps30_mutex);
@@ -309,6 +320,17 @@ int sps30_sensor_init(void)
 		LOG_DBG("SPS30 serial number: %s", serial_number);
 	}
 
+	err = sps30_start_measurement();
+	if (err) {
+		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
+			err);
+		k_mutex_unlock(&sps30_mutex);
+		return err;
+	}
+
+	/* Sleep 30s for the measurements to stabilize */
+	sensirion_i2c_hal_sleep_usec(30000000);
+
 	k_mutex_unlock(&sps30_mutex);
 
 	return err;
@@ -319,61 +341,83 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	int16_t err;
 	int16_t data_ready_flag = 0;
 	struct sps30_measurement sps30_meas;
+	struct sps30_measurement sps30_meas_avg = {0};
 
 	k_mutex_lock(&sps30_mutex, K_FOREVER);
 
-	LOG_INF("Reading SPS30 PM sensor (~1 second)");
+	/* Get the number of samples to average from Golioth settings */
+	uint32_t samples = get_sps30_samples_per_measurement_s();
 
-	err = sps30_start_measurement();
-	if (err) {
-		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
-			err);
-		k_mutex_unlock(&sps30_mutex);
-		return err;
-	}
+	LOG_INF("Reading SPS30 PM sensor (averaging %u samples over ~%u"
+		" seconds)", samples, samples);
 
-	/* Sleep while measurement is being taken */
-	sensirion_i2c_hal_sleep_usec(SPS30_MEASUREMENT_DURATION_USEC);
+	int count = 0;
+	while (count < samples) {
+		/* Poll the sensor every 0.1s waiting for the data ready status */
+		/* Data should be ready every 1s */
+		while (!data_ready_flag)
+		{
+			err = sps30_read_data_ready(&data_ready_flag);
+			if (err) {
+				LOG_ERR("Error reading SPS30 data ready status flag: "
+					"%d", err);
+				k_mutex_unlock(&sps30_mutex);
+				return err;
+			}
 
-	/* Poll the sensor every 0.1s waiting for the data ready status */
-	while (!data_ready_flag)
-	{
-		err = sps30_read_data_ready(&data_ready_flag);
+			sensirion_i2c_hal_sleep_usec(100000);
+		}
+
+		err = sps30_read_measurement(&sps30_meas);
 		if (err) {
-			LOG_ERR("Error reading SPS30 data ready status flag: "
-				"%d", err);
+			LOG_ERR("Error reading SPS30 measurement: %d", err);
 			k_mutex_unlock(&sps30_mutex);
 			return err;
 		}
 
-		sensirion_i2c_hal_sleep_usec(100000);
+		sps30_meas_avg.mc_1p0 += sps30_meas.mc_1p0;
+		sps30_meas_avg.mc_2p5 += sps30_meas.mc_2p5;
+		sps30_meas_avg.mc_4p0 += sps30_meas.mc_4p0;
+		sps30_meas_avg.mc_10p0 += sps30_meas.mc_10p0;
+		sps30_meas_avg.nc_0p5 += sps30_meas.nc_0p5;
+		sps30_meas_avg.nc_1p0 += sps30_meas.nc_1p0;
+		sps30_meas_avg.nc_2p5 += sps30_meas.nc_2p5;
+		sps30_meas_avg.nc_4p0 += sps30_meas.nc_4p0;
+		sps30_meas_avg.nc_10p0 += sps30_meas.nc_10p0;
+		sps30_meas_avg.typical_particle_size += sps30_meas.typical_particle_size;
+
+		count++;
 	}
 
-	err = sps30_read_measurement(&sps30_meas);
-	if (err) {
-		LOG_ERR("Error reading SPS30 measurement: %d", err);
-		k_mutex_unlock(&sps30_mutex);
-		return err;
-	}
+	sps30_meas_avg.mc_1p0 = sps30_meas_avg.mc_1p0 / samples;
+	sps30_meas_avg.mc_2p5 = sps30_meas_avg.mc_2p5 / samples;
+	sps30_meas_avg.mc_4p0 = sps30_meas_avg.mc_4p0 / samples;
+	sps30_meas_avg.mc_10p0 = sps30_meas_avg.mc_10p0 / samples;
+	sps30_meas_avg.nc_0p5 = sps30_meas_avg.nc_0p5 / samples;
+	sps30_meas_avg.nc_1p0 = sps30_meas_avg.nc_1p0 / samples;
+	sps30_meas_avg.nc_2p5 = sps30_meas_avg.nc_2p5 / samples;
+	sps30_meas_avg.nc_4p0 = sps30_meas_avg.nc_4p0 / samples;
+	sps30_meas_avg.nc_10p0 = sps30_meas_avg.nc_10p0 / samples;
+	sps30_meas_avg.typical_particle_size = sps30_meas_avg.typical_particle_size / samples;
 
-	sensor_value_from_double(&measurement->mc_1p0, sps30_meas.mc_1p0);
-	sensor_value_from_double(&measurement->mc_2p5, sps30_meas.mc_2p5);
-	sensor_value_from_double(&measurement->mc_4p0, sps30_meas.mc_4p0);
-	sensor_value_from_double(&measurement->mc_10p0, sps30_meas.mc_10p0);
-	sensor_value_from_double(&measurement->nc_0p5, sps30_meas.nc_0p5);
-	sensor_value_from_double(&measurement->nc_1p0, sps30_meas.nc_1p0);
-	sensor_value_from_double(&measurement->nc_2p5, sps30_meas.nc_2p5);
-	sensor_value_from_double(&measurement->nc_4p0, sps30_meas.nc_4p0);
-	sensor_value_from_double(&measurement->nc_10p0, sps30_meas.nc_10p0);
+	sensor_value_from_double(&measurement->mc_1p0, sps30_meas_avg.mc_1p0);
+	sensor_value_from_double(&measurement->mc_2p5, sps30_meas_avg.mc_2p5);
+	sensor_value_from_double(&measurement->mc_4p0, sps30_meas_avg.mc_4p0);
+	sensor_value_from_double(&measurement->mc_10p0, sps30_meas_avg.mc_10p0);
+	sensor_value_from_double(&measurement->nc_0p5, sps30_meas_avg.nc_0p5);
+	sensor_value_from_double(&measurement->nc_1p0, sps30_meas_avg.nc_1p0);
+	sensor_value_from_double(&measurement->nc_2p5, sps30_meas_avg.nc_2p5);
+	sensor_value_from_double(&measurement->nc_4p0, sps30_meas_avg.nc_4p0);
+	sensor_value_from_double(&measurement->nc_10p0, sps30_meas_avg.nc_10p0);
 	sensor_value_from_double(&measurement->typical_particle_size,
-		sps30_meas.typical_particle_size);
+		sps30_meas_avg.typical_particle_size);
 
 	LOG_INF("sps30: "
-		"PM1.0=%d.%d μg/m³; PM2.5=%d.%d μg/m³; "
-		"PM4.0=%d.%d μg/m³; PM10.0=%d.%d μg/m³; "
-		"NC0.5=%d.%d #/cm³; NC1.0=%d.%d #/cm³; "
-		"NC2.5=%d.%d #/cm³; NC4.5=%d.%d #/cm³; "
-		"NC10.0=%d.%d #/cm³; Typical Particle Size=%d.%d μm",
+		"PM1.0=%d.%d μg/m³, PM2.5=%d.%d μg/m³, "
+		"PM4.0=%d.%d μg/m³, PM10.0=%d.%d μg/m³, "
+		"NC0.5=%d.%d #/cm³, NC1.0=%d.%d #/cm³, "
+		"NC2.5=%d.%d #/cm³, NC4.5=%d.%d #/cm³, "
+		"NC10.0=%d.%d #/cm³, Typical Particle Size=%d.%d μm",
 		measurement->mc_1p0.val1, measurement->mc_1p0.val2,
 		measurement->mc_2p5.val1, measurement->mc_2p5.val2,
 		measurement->mc_4p0.val1, measurement->mc_4p0.val2,
@@ -385,14 +429,6 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		measurement->nc_10p0.val1, measurement->nc_10p0.val2,
 		measurement->typical_particle_size.val1,
 			measurement->typical_particle_size.val2);
-
-	err = sps30_stop_measurement();
-	if (err) {
-		LOG_ERR("Error exiting SPS30 measurement mode (error: "
-			"%d)", err);
-		k_mutex_unlock(&sps30_mutex);
-		return err;
-	}
 
 	k_mutex_unlock(&sps30_mutex);
 
@@ -427,14 +463,6 @@ int sps30_sensor_clean_fan(void)
 
 	LOG_INF("Cleaning SPS30 PM sensor fan (~10 seconds)");
 
-	err = sps30_start_measurement();
-	if (err) {
-		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
-			err);
-		k_mutex_unlock(&sps30_mutex);
-		return err;
-	}
-
 	err = sps30_start_manual_fan_cleaning();
 	if (err) {
 		LOG_ERR("Error starting SPS30 manual fan clearing: %d", err);
@@ -442,15 +470,8 @@ int sps30_sensor_clean_fan(void)
 		return err;
 	}
 
+	/* Sleep 10s for the fan cleaning to finish */
 	sensirion_i2c_hal_sleep_usec(10000000);
-
-	err = sps30_stop_measurement();
-	if (err) {
-		LOG_ERR("Error exiting SPS30 measurement mode (error: "
-			"%d)", err);
-		k_mutex_unlock(&sps30_mutex);
-		return err;
-	}
 
 	k_mutex_unlock(&sps30_mutex);
 

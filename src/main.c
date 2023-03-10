@@ -143,24 +143,6 @@ void main(void)
 		LOG_ERR("Unable to configure LED for Golioth Logo");
 	}
 
-	/* Initialize weather sensor */
-	err = bme280_sensor_init();
-	if (err) {
-		return;
-	}
-
-	/* Initialize CO₂ sensor */
-	err = scd4x_sensor_init();
-	if (err) {
-		return;
-	}
-
-	/* Initialize PM sensor */
-	err = sps30_sensor_init();
-	if (err) {
-		return;
-	}
-
 	/* Initialize app state */
 	LOG_INF("Initializing app state");
 	app_state_init(client);
@@ -218,6 +200,24 @@ void main(void)
 
 	gpio_init_callback(&button_cb_data, button_pressed, BIT(user_btn.pin));
 	gpio_add_callback(user_btn.port, &button_cb_data);
+
+	/* Initialize weather sensor */
+	err = bme280_sensor_init();
+	if (err) {
+		return;
+	}
+
+	/* Initialize CO₂ sensor */
+	err = scd4x_sensor_init();
+	if (err) {
+		return;
+	}
+
+	/* Initialize PM sensor */
+	err = sps30_sensor_init();
+	if (err) {
+		return;
+	}
 
 	/* Set up a slideshow on Ostentus
 	 *  - add up to 256 slides

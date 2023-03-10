@@ -114,6 +114,15 @@ The following settings should be set in the Device Settings menu of the
 
    Default value is ``true``.
 
+``PM_SENSOR_SAMPLES_PER_MEASUREMENT``
+   Adjusts the number of samples averaged together when fetching a measurement
+   from the particulate matter sensor. Set to an integer value (samples).
+
+   Note that each sample requires ~1s to fetch, so there is a tradeoff between
+   getting a good average sample and the time required to fetch the measurement.
+
+   Default value is ``30`` samples per measurement.
+
 ``PM_SENSOR_AUTO_CLEANING_INTERVAL``
    Adjusts the automatic fan cleaning interval setting for the SPS30 particulate
    matter sensor. Set to an integer value (seconds).

@@ -17,6 +17,7 @@ static uint32_t _co2_warning_threshold_s = 800;
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s = 0;
 static bool _scd4x_asc_s = true;
+static uint32_t _sps30_samples_per_measurement_s = 30;
 static uint32_t _sps30_cleaning_interval_s = 604800;
 
 uint32_t get_loop_delay_s(void)
@@ -42,6 +43,11 @@ uint16_t get_scd4x_altitude_s(void)
 bool get_scd4x_asc_s(void)
 {
 	return _scd4x_asc_s;
+}
+
+uint32_t get_sps30_samples_per_measurement_s(void)
+{
+	return _sps30_samples_per_measurement_s;
 }
 
 uint32_t get_sps30_cleaning_interval_s(void)
@@ -208,6 +214,31 @@ enum golioth_settings_status on_setting(
 			_scd4x_asc_s = (bool)value->b;
 			/* Submit a work item to write this to the sensor */
 			k_work_submit(&scd4x_sensor_set_automatic_self_calibration_work);
+		}
+		return GOLIOTH_SETTINGS_SUCCESS;
+	}
+
+	if (strcmp(key, "PM_SENSOR_SAMPLES_PER_MEASUREMENT") == 0) {
+		/* This setting is expected to be numeric, return an error if
+		it's not */
+		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
+		}
+
+		/* Limit to seconds in the range [UINT32_MIN, UINT32_MAX] */
+		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT"
+				" setting is outside allowed range.");
+			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
+		}
+
+		/* Only update if value has changed */
+		if (_sps30_samples_per_measurement_s == (uint32_t)value->i64) {
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT"
+				" setting already matches local value.");
+		}
+		else {
+			_sps30_samples_per_measurement_s = (uint32_t)value->i64;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
