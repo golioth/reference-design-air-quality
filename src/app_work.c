@@ -119,13 +119,6 @@ void app_work_sensor_read(void) {
 	err = scd4x_sensor_read(&scd4x_sm);
 	if (err) {
 		return;
-	} else {
-		if (scd4x_sm.co2 >= get_co2_warning_threshold_s()) {
-			set_warning_indicator(1);
-		} else {
-			set_warning_indicator(0);
-		}
-		app_state_update_actual();
 	}
 
 	/* Read the PM sensor */

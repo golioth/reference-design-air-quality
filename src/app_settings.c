@@ -13,7 +13,6 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include "sensors.h"
 
 static uint32_t _loop_delay_s = 60;
-static uint32_t _co2_warning_threshold_s = 800;
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s = 0;
 static bool _scd4x_asc_s = true;
@@ -23,11 +22,6 @@ static uint32_t _sps30_cleaning_interval_s = 604800;
 uint32_t get_loop_delay_s(void)
 {
 	return _loop_delay_s;
-}
-
-uint32_t get_co2_warning_threshold_s(void)
-{
-	return _co2_warning_threshold_s;
 }
 
 int32_t get_scd4x_temperature_offset_s(void)
@@ -113,33 +107,6 @@ enum golioth_settings_status on_setting(
 			LOG_INF("Set main loop delay to %d seconds", _loop_delay_s);
 
 			wake_system_thread();
-		}
-		return GOLIOTH_SETTINGS_SUCCESS;
-	}
-
-	if (strcmp(key, "CO2_WARNING_THRESHOLD") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
-		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
-			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
-		}
-
-		/* Limit to ppm in the range [0, UINT32_MAX] */
-		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
-			LOG_DBG("Received CO2_WARNING_THRESHOLD setting is"
-				" outside allowed range.");
-			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
-		}
-
-		/* Only update if value has changed */
-		if (_co2_warning_threshold_s == (uint32_t)value->i64) {
-			LOG_DBG("Received CO2_WARNING_THRESHOLD setting already"
-				" matches local value.");
-		}
-		else {
-			_co2_warning_threshold_s = (uint32_t)value->i64;
-			LOG_INF("Set CO₂ warning threshold to %u ppm",
-				_co2_warning_threshold_s);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}

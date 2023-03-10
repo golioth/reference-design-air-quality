@@ -91,11 +91,6 @@ The following settings should be set in the Device Settings menu of the
 
    Default value is ``60`` seconds.
 
-``CO2_WARNING_THRESHOLD``
-   Adjusts the warning threshold for CO₂ levels. Set to an integer value (ppm).
-
-   Default value is ``800`` ppm.
-
 ``CO2_SENSOR_TEMPERATURE_OFFSET``
    Adjusts the temperature offset setting for the SCD4x CO₂ sensor. Set to an
    integer value (milli °C).
