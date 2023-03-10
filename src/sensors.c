@@ -380,6 +380,9 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		sps30_meas_avg.nc_10p0 += sps30_meas.nc_10p0;
 		sps30_meas_avg.typical_particle_size += sps30_meas.typical_particle_size;
 
+		/* Wait for a new sample to be ready */
+		sensirion_i2c_hal_sleep_usec(SPS30_MEASUREMENT_DURATION_USEC);
+
 		count++;
 	}
 
