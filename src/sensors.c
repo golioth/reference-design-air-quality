@@ -413,7 +413,7 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		"PM1.0=%d.%d μg/m³, PM2.5=%d.%d μg/m³, "
 		"PM4.0=%d.%d μg/m³, PM10.0=%d.%d μg/m³, "
 		"NC0.5=%d.%d #/cm³, NC1.0=%d.%d #/cm³, "
-		"NC2.5=%d.%d #/cm³, NC4.5=%d.%d #/cm³, "
+		"NC2.5=%d.%d #/cm³, NC4.0=%d.%d #/cm³, "
 		"NC10.0=%d.%d #/cm³, Typical Particle Size=%d.%d μm",
 		measurement->mc_1p0.val1, measurement->mc_1p0.val2,
 		measurement->mc_2p5.val1, measurement->mc_2p5.val2,
