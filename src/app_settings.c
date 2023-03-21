@@ -14,7 +14,7 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 
 static uint32_t _loop_delay_s = 60;
 static int32_t _scd4x_temperature_offset_s = 4;
-static uint16_t _scd4x_altitude_s = 0;
+static uint16_t _scd4x_altitude_s;
 static bool _scd4x_asc_s = true;
 static uint32_t _sps30_samples_per_measurement_s = 30;
 static uint32_t _sps30_cleaning_interval_s = 604800;
@@ -84,8 +84,7 @@ enum golioth_settings_status on_setting(
 {
 	LOG_DBG("Received setting: key = %s, type = %d", key, value->type);
 	if (strcmp(key, "LOOP_DELAY_S") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
+		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -101,8 +100,7 @@ enum golioth_settings_status on_setting(
 		if (_loop_delay_s == (uint32_t)value->i64) {
 			LOG_DBG("Received LOOP_DELAY_S setting already matches"
 				" local value.");
-		}
-		else {
+		} else {
 			_loop_delay_s = (uint32_t)value->i64;
 			LOG_INF("Set main loop delay to %d seconds", _loop_delay_s);
 
@@ -112,8 +110,7 @@ enum golioth_settings_status on_setting(
 	}
 
 	if (strcmp(key, "CO2_SENSOR_TEMPERATURE_OFFSET") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
+		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -129,8 +126,7 @@ enum golioth_settings_status on_setting(
 		if (_scd4x_temperature_offset_s == (int32_t)value->i64) {
 			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting"
 				" already matches local value.");
-		}
-		else {
+		} else {
 			_scd4x_temperature_offset_s = (int32_t)value->i64;
 			/* Submit a work item to write this to the sensor */
 			k_work_submit(&scd4x_sensor_set_temperature_offset_work);
@@ -139,8 +135,7 @@ enum golioth_settings_status on_setting(
 	}
 
 	if (strcmp(key, "CO2_SENSOR_ALTITUDE") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
+		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -156,8 +151,7 @@ enum golioth_settings_status on_setting(
 		if (_scd4x_altitude_s == (uint16_t)value->i64) {
 			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting already"
 				" matches local value.");
-		}
-		else {
+		} else {
 			_scd4x_altitude_s = (uint16_t)value->i64;
 			/* Submit a work item to write this to the sensor */
 			k_work_submit(&scd4x_sensor_set_sensor_altitude_work);
@@ -166,8 +160,7 @@ enum golioth_settings_status on_setting(
 	}
 
 	if (strcmp(key, "CO2_SENSOR_ASC_ENABLE") == 0) {
-		/* This setting is expected to be boolean, return an error if
-		it's not */
+		/* This setting is expected to be boolean, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_BOOL) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -176,8 +169,7 @@ enum golioth_settings_status on_setting(
 		if (_scd4x_asc_s == (bool)value->b) {
 			LOG_DBG("Received CO2_SENSOR_ASC_ENABLE setting already"
 				" matches local value.");
-		}
-		else {
+		} else {
 			_scd4x_asc_s = (bool)value->b;
 			/* Submit a work item to write this to the sensor */
 			k_work_submit(&scd4x_sensor_set_automatic_self_calibration_work);
@@ -186,8 +178,7 @@ enum golioth_settings_status on_setting(
 	}
 
 	if (strcmp(key, "PM_SENSOR_SAMPLES_PER_MEASUREMENT") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
+		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -203,16 +194,14 @@ enum golioth_settings_status on_setting(
 		if (_sps30_samples_per_measurement_s == (uint32_t)value->i64) {
 			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT"
 				" setting already matches local value.");
-		}
-		else {
+		} else {
 			_sps30_samples_per_measurement_s = (uint32_t)value->i64;
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
 
 	if (strcmp(key, "PM_SENSOR_AUTO_CLEANING_INTERVAL") == 0) {
-		/* This setting is expected to be numeric, return an error if
-		it's not */
+		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
@@ -228,8 +217,7 @@ enum golioth_settings_status on_setting(
 		if (_sps30_cleaning_interval_s == (uint32_t)value->i64) {
 			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL"
 				" setting already matches local value.");
-		}
-		else {
+		} else {
 			_sps30_cleaning_interval_s = (uint32_t)value->i64;
 			/* Submit a work item to write this to the sensor */
 			k_work_submit(&sps30_sensor_set_fan_auto_cleaning_interval_work);
