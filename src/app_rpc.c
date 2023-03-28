@@ -18,11 +18,12 @@ LOG_MODULE_REGISTER(app_rpc, LOG_LEVEL_DBG);
 #include "main.h"
 #include "sensors.h"
 
-static void reboot_work_handler(struct k_work *work) {
+static void reboot_work_handler(struct k_work *work)
+{
 	/* Sync longs before reboot */
 	LOG_PANIC();
 
-	for (int8_t i=5; i>=0; i--) {
+	for (int8_t i = 5; i >= 0; i--) {
 		if (i) {
 			LOG_INF("Rebooting in %d seconds...", i);
 		}
@@ -72,16 +73,17 @@ static enum golioth_rpc_status on_set_log_level(
 
 	int source_id = 0;
 	char *source_name;
-	while(1) {
+
+	while (1) {
 		source_name = (char *)log_source_name_get(0, source_id);
 		if (source_name == NULL) {
 			break;
-		} else {
-			LOG_WRN("Settings %s log level to: %d", source_name,
-			log_level);
-			log_filter_set(NULL, 0, source_id, log_level);
-			++source_id;
 		}
+
+		LOG_WRN("Settings %s log level to: %d", source_name,
+		log_level);
+		log_filter_set(NULL, 0, source_id, log_level);
+		++source_id;
 	}
 	return GOLIOTH_RPC_OK;
 }
@@ -116,13 +118,15 @@ static enum golioth_rpc_status on_reset_pm_sensor(
 	return GOLIOTH_RPC_OK;
 }
 
-static void rpc_log_if_register_failure(int err) {
+static void rpc_log_if_register_failure(int err)
+{
 	if (err) {
 		LOG_ERR("Failed to register RPC: %d", err);
 	}
 }
 
-int app_register_rpc(struct golioth_client *rpc_client) {
+int app_register_rpc(struct golioth_client *rpc_client)
+{
 	int err;
 
 	err = golioth_rpc_register(rpc_client, "reboot", on_reboot, NULL);

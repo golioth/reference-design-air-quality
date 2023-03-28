@@ -59,7 +59,8 @@ static const struct battery_level_point batt_levels[] = {
 };
 
 /* Callback for LightDB Stream */
-static int async_error_handler(struct golioth_req_rsp *rsp) {
+static int async_error_handler(struct golioth_req_rsp *rsp)
+{
 	if (rsp->err) {
 		LOG_ERR("Async task failed: %d", rsp->err);
 		return rsp->err;
@@ -69,7 +70,8 @@ static int async_error_handler(struct golioth_req_rsp *rsp) {
 
 /* This will be called by the main() loop */
 /* Do all of your work here! */
-void app_work_sensor_read(void) {
+void app_work_sensor_read(void)
+{
 	int err;
 	struct sensor_value batt_v = {0, 0};
 	struct sensor_value batt_lvl = {0, 0};
@@ -89,6 +91,7 @@ void app_work_sensor_read(void) {
 
 	/* Read the battery voltage */
 	int batt_mV = battery_sample();
+
 	if (batt_mV < 0) {
 		LOG_ERR("Failed to read battery voltage: %d", batt_mV);
 		return;
@@ -179,6 +182,7 @@ void app_work_sensor_read(void) {
 	slide_set(PM10P0, json_buf, strlen(json_buf));
 }
 
-void app_work_init(struct golioth_client* work_client) {
+void app_work_init(struct golioth_client *work_client)
+{
 	client = work_client;
 }
