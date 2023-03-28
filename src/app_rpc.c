@@ -138,9 +138,11 @@ int app_register_rpc(struct golioth_client *rpc_client)
 
 	err = golioth_rpc_register(rpc_client, "clean_pm_sensor",
 		on_clean_pm_sensor, NULL);
+	rpc_log_if_register_failure(err);
 
 	err = golioth_rpc_register(rpc_client, "reset_pm_sensor",
 		on_reset_pm_sensor, NULL);
+	rpc_log_if_register_failure(err);
 
 	return err;
 }
