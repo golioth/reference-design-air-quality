@@ -47,17 +47,6 @@ Use ``west`` to initialize and install
 This will also install the `golioth-zephyr-boards`_ definitions for the Golioth
 Aludel-Mini carrier board.
 
-Install ``pre-commit`` hooks
-============================
-
-This will install ``pre-commit`` hooks that will automatically check for simple
-issues before they are checked into the repo.
-
-.. code-block:: console
-
-   cd ~/golioth-reference-design-template/app
-   pre-commit install
-
 Building the application
 ************************
 
