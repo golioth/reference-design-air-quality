@@ -22,22 +22,22 @@ static struct golioth_client *client;
 
 /* Formatting string for sending sensor JSON to Golioth */
 #define JSON_FMT "{\
-\"tem\":%d.%d,\
-\"pre\":%d.%d,\
-\"hum\":%d.%d,\
+\"tem\":%f,\
+\"pre\":%f,\
+\"hum\":%f,\
 \"co2\":%u,\
-\"mc_1p0\":%d.%d,\
-\"mc_2p5\":%d.%d,\
-\"mc_4p0\":%d.%d,\
-\"mc_10p0\":%d.%d,\
-\"nc_0p5\":%d.%d,\
-\"nc_1p0\":%d.%d,\
-\"nc_2p5\":%d.%d,\
-\"nc_4p0\":%d.%d,\
-\"nc_10p0\":%d.%d,\
-\"tps\":%d.%d,\
-\"batt_v\":%.2f,\
-\"batt_lvl\":%.2f}"
+\"mc_1p0\":%f,\
+\"mc_2p5\":%f,\
+\"mc_4p0\":%f,\
+\"mc_10p0\":%f,\
+\"nc_0p5\":%f,\
+\"nc_1p0\":%f,\
+\"nc_2p5\":%f,\
+\"nc_4p0\":%f,\
+\"nc_10p0\":%f,\
+\"tps\":%f,\
+\"batt_v\":%f,\
+\"batt_lvl\":%f}"
 
 /* Callback for LightDB Stream */
 static int async_error_handler(struct golioth_req_rsp *rsp)
@@ -94,21 +94,20 @@ void app_work_sensor_read(void)
 	LOG_DBG("Sending sensor data to Golioth");
 
 	snprintk(json_buf, sizeof(json_buf), JSON_FMT,
-		bme280_sm.temperature.val1, bme280_sm.temperature.val2,
-		bme280_sm.pressure.val1, bme280_sm.pressure.val2,
-		bme280_sm.humidity.val1, bme280_sm.humidity.val2,
+		sensor_value_to_double(&bme280_sm.temperature),
+		sensor_value_to_double(&bme280_sm.pressure),
+		sensor_value_to_double(&bme280_sm.humidity),
 		scd4x_sm.co2,
-		sps30_sm.mc_1p0.val1, sps30_sm.mc_1p0.val2,
-		sps30_sm.mc_2p5.val1, sps30_sm.mc_2p5.val2,
-		sps30_sm.mc_4p0.val1, sps30_sm.mc_4p0.val2,
-		sps30_sm.mc_10p0.val1, sps30_sm.mc_10p0.val2,
-		sps30_sm.nc_0p5.val1, sps30_sm.nc_0p5.val2,
-		sps30_sm.nc_1p0.val1, sps30_sm.nc_1p0.val2,
-		sps30_sm.nc_2p5.val1, sps30_sm.nc_2p5.val2,
-		sps30_sm.nc_4p0.val1, sps30_sm.nc_4p0.val2,
-		sps30_sm.nc_10p0.val1, sps30_sm.nc_10p0.val2,
-		sps30_sm.typical_particle_size.val1,
-		sps30_sm.typical_particle_size.val2,
+		sensor_value_to_double(&sps30_sm.mc_1p0),
+		sensor_value_to_double(&sps30_sm.mc_2p5),
+		sensor_value_to_double(&sps30_sm.mc_4p0),
+		sensor_value_to_double(&sps30_sm.mc_10p0),
+		sensor_value_to_double(&sps30_sm.nc_0p5),
+		sensor_value_to_double(&sps30_sm.nc_1p0),
+		sensor_value_to_double(&sps30_sm.nc_2p5),
+		sensor_value_to_double(&sps30_sm.nc_4p0),
+		sensor_value_to_double(&sps30_sm.nc_10p0),
+		sensor_value_to_double(&sps30_sm.typical_particle_size),
 		sensor_value_to_double(&batt_v),
 		sensor_value_to_double(&batt_lvl));
 
@@ -124,22 +123,22 @@ void app_work_sensor_read(void)
 	 *  -values should be sent as strings
 	 *  -use the enum from app_work.h for slide key values
 	 */
-	snprintk(json_buf, sizeof(json_buf), "%d.%d C",
-		bme280_sm.temperature.val1, bme280_sm.temperature.val2 / 10000);
+	snprintk(json_buf, sizeof(json_buf), "%f C",
+		sensor_value_to_double(&bme280_sm.temperature));
 	slide_set(TEMPERATURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d kPa",
-		bme280_sm.pressure.val1, bme280_sm.pressure.val2 / 10000);
+	snprintk(json_buf, sizeof(json_buf), "%f kPa",
+		sensor_value_to_double(&bme280_sm.pressure));
 	slide_set(PRESSURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d %%RH",
-		bme280_sm.humidity.val1, bme280_sm.humidity.val2 / 10000);
+	snprintk(json_buf, sizeof(json_buf), "%f %%RH",
+		sensor_value_to_double(&bme280_sm.humidity));
 	slide_set(HUMIDITY, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
 	slide_set(CO2, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d ug/m^3",
-		sps30_sm.mc_2p5.val1, sps30_sm.mc_2p5.val1 / 10000);
+	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
+		sensor_value_to_double(&sps30_sm.mc_2p5));
 	slide_set(PM2P5, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%d.%d ug/m^3",
-		sps30_sm.mc_10p0.val1, sps30_sm.mc_10p0.val1 / 10000);
+	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
+		sensor_value_to_double(&sps30_sm.mc_10p0));
 	slide_set(PM10P0, json_buf, strlen(json_buf));
 }
 

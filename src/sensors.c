@@ -61,11 +61,12 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 	sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY,
 		&measurement->humidity);
 
-	LOG_INF("bme280: Temperature=%d.%d °C, Pressure=%d.%d kPa,"
-		" Humidity=%d.%d %%RH",
-		measurement->temperature.val1, measurement->temperature.val2,
-		measurement->pressure.val1, measurement->pressure.val2,
-		measurement->humidity.val1, measurement->humidity.val2);
+	LOG_INF("bme280: Temperature=%f °C, Pressure=%f kPa,"
+		" Humidity=%f %%RH",
+		sensor_value_to_double(&measurement->temperature),
+		sensor_value_to_double(&measurement->pressure),
+		sensor_value_to_double(&measurement->humidity)
+	);
 
 	k_mutex_unlock(&bme280_mutex);
 
@@ -135,6 +136,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	bool data_ready_flag = false;
 	uint16_t co2_ppm;
 	int32_t temperature_m_deg_c, humidity_m_percent_rh;
+	float temperature_deg_c, humidity_percent_rh;
 
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
 
@@ -180,16 +182,21 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 		return err;
 	}
 
+	temperature_deg_c = temperature_m_deg_c / 1000.0;
+	humidity_percent_rh = humidity_m_percent_rh / 1000.0;
+
 	measurement->co2 = co2_ppm;
 	sensor_value_from_double(&measurement->temperature,
-		temperature_m_deg_c / 1000.0);
+		temperature_deg_c);
 	sensor_value_from_double(&measurement->humidity,
-		humidity_m_percent_rh / 1000.0);
+		humidity_percent_rh);
 
-	LOG_INF("scd4x: CO₂=%u ppm, Temperature=%d.%d °C,"
-		" Humidity=%d.%d %%RH", measurement->co2,
-		measurement->temperature.val1, measurement->temperature.val2,
-		measurement->humidity.val1, measurement->humidity.val2);
+	LOG_INF("scd4x: CO₂=%u ppm, Temperature=%f °C,"
+		" Humidity=%f %%RH",
+		co2_ppm,
+		temperature_deg_c,
+		humidity_percent_rh
+	);
 
 	k_mutex_unlock(&scd4x_mutex);
 
@@ -410,22 +417,22 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		sps30_meas_avg.typical_particle_size);
 
 	LOG_INF("sps30: "
-		"PM1.0=%d.%d μg/m³, PM2.5=%d.%d μg/m³, "
-		"PM4.0=%d.%d μg/m³, PM10.0=%d.%d μg/m³, "
-		"NC0.5=%d.%d #/cm³, NC1.0=%d.%d #/cm³, "
-		"NC2.5=%d.%d #/cm³, NC4.0=%d.%d #/cm³, "
-		"NC10.0=%d.%d #/cm³, Typical Particle Size=%d.%d μm",
-		measurement->mc_1p0.val1, measurement->mc_1p0.val2,
-		measurement->mc_2p5.val1, measurement->mc_2p5.val2,
-		measurement->mc_4p0.val1, measurement->mc_4p0.val2,
-		measurement->mc_10p0.val1, measurement->mc_10p0.val2,
-		measurement->nc_0p5.val1, measurement->nc_0p5.val2,
-		measurement->nc_1p0.val1, measurement->nc_1p0.val2,
-		measurement->nc_2p5.val1, measurement->nc_2p5.val2,
-		measurement->nc_4p0.val1, measurement->nc_4p0.val2,
-		measurement->nc_10p0.val1, measurement->nc_10p0.val2,
-		measurement->typical_particle_size.val1,
-			measurement->typical_particle_size.val2);
+		"PM1.0=%f μg/m³, PM2.5=%f μg/m³, "
+		"PM4.0=%f μg/m³, PM10.0=%f μg/m³, "
+		"NC0.5=%f #/cm³, NC1.0=%f #/cm³, "
+		"NC2.5=%f #/cm³, NC4.0=%f #/cm³, "
+		"NC10.0=%f #/cm³, Typical Particle Size=%f μm",
+		sps30_meas_avg.mc_1p0,
+		sps30_meas_avg.mc_2p5,
+		sps30_meas_avg.mc_4p0,
+		sps30_meas_avg.mc_10p0,
+		sps30_meas_avg.nc_0p5,
+		sps30_meas_avg.nc_1p0,
+		sps30_meas_avg.nc_2p5,
+		sps30_meas_avg.nc_4p0,
+		sps30_meas_avg.nc_10p0,
+		sps30_meas_avg.typical_particle_size
+	);
 
 	k_mutex_unlock(&sps30_mutex);
 
