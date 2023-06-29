@@ -4,7 +4,7 @@ manifest:
   projects:
     - name: golioth
       path: modules/lib/golioth
-      revision: a5a177d8cc9d49b913178774e6ff9e7c86192168
+      revision: v0.6.0
       url: https://github.com/golioth/golioth-zephyr-sdk
       west-commands: scripts/west-commands.yml
       import:
@@ -38,7 +38,7 @@ manifest:
 
     - name: sensirion-embedded-common
       path: app/external/sensirion/embedded-common
-      revision: 66cf952d54a51b537f4573e7be1a7c4451a84b48
+      revision: f0a64d166266b364c558d407739c96fdc5395df1
       url: https://github.com/golioth/sensirion-embedded-common.git
 
     - name: sensirion-embedded-i2c-scd4x
