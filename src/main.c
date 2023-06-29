@@ -48,8 +48,8 @@ static void golioth_on_connect(struct golioth_client *client)
 
 	LOG_INF("Registering observations with Golioth");
 	app_dfu_observe();
-	app_register_settings(client);
-	app_register_rpc(client);
+	app_settings_observe();
+	app_rpc_observe();
 	app_state_observe();
 
 	static bool initial_connection = true;
@@ -131,11 +131,14 @@ void main(void)
 
 	LOG_INF("Started air quality monitor app");
 
+	LOG_INF("Firmware version: %s", CONFIG_MCUBOOT_IMAGE_VERSION);
+
 	/* Update Ostentus LEDS using bitmask (Power On and Battery)*/
 	led_bitmask(LED_POW | LED_BAT);
 
 	/* Show Golioth Logo on Ostentus ePaper screen */
 	show_splash();
+	k_sleep(K_SECONDS(4));
 
 	/* Initialize Golioth logo LED */
 	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
@@ -144,16 +147,19 @@ void main(void)
 	}
 
 	/* Initialize app state */
-	LOG_INF("Initializing app state");
 	app_state_init(client);
 
 	/* Initialize app work */
-	LOG_INF("Initializing app work");
 	app_work_init(client);
 
 	/* Initialize DFU components */
-	LOG_INF("Initializing DFU components");
 	app_dfu_init(client);
+
+	/* Initialize app settings */
+	app_settings_init(client);
+
+	/* Initialize app RPC */
+	app_rpc_init(client);
 
 	/* Register Golioth on_connect callback */
 	client->on_connect = golioth_on_connect;

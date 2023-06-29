@@ -15,6 +15,8 @@ uint16_t get_scd4x_altitude_s(void);
 bool get_scd4x_asc_s(void);
 uint32_t get_sps30_samples_per_measurement_s(void);
 uint32_t get_sps30_cleaning_interval_s(void);
+void app_settings_init(struct golioth_client *state_client);
+void app_settings_observe(void);
 int app_register_settings(struct golioth_client *settings_client);
 
 #endif /* __APP_SETTINGS_H__ */

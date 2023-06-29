@@ -12,6 +12,8 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include "main.h"
 #include "sensors.h"
 
+static struct golioth_client *client;
+
 static uint32_t _loop_delay_s = 60;
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s;
@@ -237,11 +239,27 @@ enum golioth_settings_status on_setting(
 	return GOLIOTH_SETTINGS_KEY_NOT_RECOGNIZED;
 }
 
+void app_settings_init(struct golioth_client *state_client)
+{
+	client = state_client;
+	app_register_settings(client);
+}
+
+void app_settings_observe(void)
+{
+	int err;
+
+	err = golioth_settings_observe(client);
+	if (err) {
+		LOG_ERR("Failed to observe settings: %d", err);
+	}
+}
+
 int app_register_settings(struct golioth_client *settings_client)
 {
-	int err = golioth_settings_register_callback(settings_client,
-		on_setting);
+	int err;
 
+	err = golioth_settings_register_callback(settings_client, on_setting);
 	if (err) {
 		LOG_ERR("Failed to register settings callback: %d", err);
 	}
