@@ -86,6 +86,7 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "LOOP_DELAY_S") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			LOG_DBG("Received LOOP_DELAY_S is not an integer type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
@@ -112,6 +113,7 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "CO2_SENSOR_TEMPERATURE_OFFSET") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET is not an integer type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
@@ -137,6 +139,7 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "CO2_SENSOR_ALTITUDE") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			LOG_DBG("Received CO2_SENSOR_ALTITUDE is not an integer type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
@@ -162,6 +165,7 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "CO2_SENSOR_ASC_ENABLE") == 0) {
 		/* This setting is expected to be boolean, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_BOOL) {
+			LOG_DBG("Received CO2_SENSOR_ASC_ENABLE is not a boolean type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
@@ -180,6 +184,8 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "PM_SENSOR_SAMPLES_PER_MEASUREMENT") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT is not an integer"
+				" type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
@@ -203,6 +209,8 @@ enum golioth_settings_status on_setting(
 	if (strcmp(key, "PM_SENSOR_AUTO_CLEANING_INTERVAL") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
+			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL is not an integer"
+				" type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
