@@ -7,6 +7,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 
+#include <stdio.h>
 #include <net/golioth/system_client.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
@@ -57,21 +58,31 @@ static int async_error_handler(struct golioth_req_rsp *rsp)
 void app_work_sensor_read(void)
 {
 	int err;
-	struct sensor_value batt_v = {0, 0};
-	struct sensor_value batt_lvl = {0, 0};
+	struct sensor_value batt_v = {-1, 0};
+	struct sensor_value batt_lvl = {-1, 0};
 	struct bme280_sensor_measurement bme280_sm;
 	struct scd4x_sensor_measurement scd4x_sm;
 	struct sps30_sensor_measurement sps30_sm;
 	char json_buf[512];
+	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+	char batt_v_str[7];
+	char batt_lvl_str[5];
+	#endif
 
 	LOG_DBG("Collecting battery measurements");
 
-	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
-		read_battery_info(&batt_v, &batt_lvl);
+	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+	read_battery_info(&batt_v, &batt_lvl);
 
-		LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
-			sensor_value_to_double(&batt_v), batt_lvl.val1);
-	));
+	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
+		sensor_value_to_double(&batt_v), batt_lvl.val1);
+
+	snprintf(batt_v_str, sizeof(batt_v_str), "%.2f V",
+		sensor_value_to_double(&batt_v));
+	snprintf(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
+	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
+	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
+	#endif
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -128,21 +139,21 @@ void app_work_sensor_read(void)
 	 */
 	snprintk(json_buf, sizeof(json_buf), "%f C",
 		sensor_value_to_double(&bme280_sm.temperature));
-	slide_set(TEMPERATURE, json_buf, strlen(json_buf));
+	slide_set(O_TEMPERATURE, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%f kPa",
 		sensor_value_to_double(&bme280_sm.pressure));
-	slide_set(PRESSURE, json_buf, strlen(json_buf));
+	slide_set(O_PRESSURE, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%f %%RH",
 		sensor_value_to_double(&bme280_sm.humidity));
-	slide_set(HUMIDITY, json_buf, strlen(json_buf));
+	slide_set(O_HUMIDITY, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
-	slide_set(CO2, json_buf, strlen(json_buf));
+	slide_set(O_CO2, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
 		sensor_value_to_double(&sps30_sm.mc_2p5));
-	slide_set(PM2P5, json_buf, strlen(json_buf));
+	slide_set(O_PM2P5, json_buf, strlen(json_buf));
 	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
 		sensor_value_to_double(&sps30_sm.mc_10p0));
-	slide_set(PM10P0, json_buf, strlen(json_buf));
+	slide_set(O_PM10P0, json_buf, strlen(json_buf));
 }
 
 void app_work_init(struct golioth_client *work_client)

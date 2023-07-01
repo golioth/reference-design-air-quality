@@ -212,14 +212,24 @@ void main(void)
 	 *  - use the enum in app_work.h to add new keys
 	 *  - values are updated using these keys (see app_work.c)
 	 */
-	slide_add(CO2, "CO2", strlen("CO2"));
-	slide_add(PM2P5, "PM2.5", strlen("PM2.5"));
-	slide_add(PM10P0, "PM10.0", strlen("PM10.0"));
-	slide_add(TEMPERATURE, "Temperature", strlen("Temperature"));
-	slide_add(PRESSURE, "Pressure", strlen("Pressure"));
-	slide_add(HUMIDITY, "Humidity", strlen("Humidity"));
-	/* Set the title of the Ostentus summary slide (optional) */
-	summary_title("Air Quality", strlen("Air Quality"));
+	slide_add(O_CO2, O_LABEL_CO2, strlen(O_LABEL_CO2));
+	slide_add(O_PM2P5, O_LABEL_PM2P5, strlen(O_LABEL_PM2P5));
+	slide_add(O_PM10P0, O_LABEL_PM10P0, strlen(O_LABEL_PM10P0));
+	slide_add(O_TEMPERATURE, O_LABEL_TEMPERATURE, strlen(O_LABEL_TEMPERATURE));
+	slide_add(O_PRESSURE, O_LABEL_PRESSURE, strlen(O_LABEL_PRESSURE));
+	slide_add(O_HUMIDITY, O_LABEL_HUMIDITY, strlen(O_LABEL_HUMIDITY));
+	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+	slide_add(O_BATTERY_V, O_LABEL_BATTERY, strlen(O_LABEL_BATTERY));
+	slide_add(O_BATTERY_LVL, O_LABEL_BATTERY, strlen(O_LABEL_BATTERY));
+	#endif
+	slide_add(O_FIRMWARE, O_LABEL_FIRMWARE, strlen(O_LABEL_FIRMWARE));
+
+	/* Set the title ofthe Ostentus summary slide (optional) */
+	summary_title(O_SUMMARY_TITLE, strlen(O_SUMMARY_TITLE));
+
+	/* Update the Firmware slide with the firmware version */
+	slide_set(O_FIRMWARE, CONFIG_MCUBOOT_IMAGE_VERSION, strlen(CONFIG_MCUBOOT_IMAGE_VERSION));
+
 	/* Start Ostentus slideshow with 30 second delay between slides */
 	slideshow(30000);
 
