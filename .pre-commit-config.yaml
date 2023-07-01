@@ -14,3 +14,7 @@ repos:
     rev: v0.1.2
     hooks:
     - id: zephyr-checkpatch
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v1.1.2
+    hooks:
+    - id: reuse
