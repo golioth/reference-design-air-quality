@@ -1,0 +1,22 @@
+/*
+ * Copyright (c) 2023 Golioth, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+ / {
+	aliases {
+		click-i2c = &arduino_i2c;
+		golioth-led = &led2;
+	};
+};
+
+&arduino_i2c {
+	/* Needed for I2C writes used by libostentus */
+	zephyr,concat-buf-size = <48>;
+
+	bme280: bme280@76 {
+		compatible = "bosch,bme280";
+		reg = <0x76>;
+	};
+};
