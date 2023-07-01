@@ -15,8 +15,11 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include "app_settings.h"
 #include "app_work.h"
 #include "sensors.h"
-#include "battery.h"
 #include "libostentus/libostentus.h"
+
+#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+#include "battery_monitor/battery.h"
+#endif
 
 static struct golioth_client *client;
 
