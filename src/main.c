@@ -7,8 +7,10 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 
-#include <modem/modem_info.h>
 #include <modem/lte_lc.h>
+#ifdef CONFIG_MODEM_INFO
+#include <modem/modem_info.h>
+#endif
 #include <net/golioth/system_client.h>
 #include <samples/common/net_connect.h>
 #include <zephyr/net/coap.h>
@@ -126,10 +128,14 @@ void network_led_set(uint8_t state) {
 void main(void)
 {
 	int err;
-	char sbuf[128];
 
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
+
+	LOG_INF("Started air quality monitor app");
+
+	#ifdef CONFIG_MODEM_INFO
+	char sbuf[128];
 
 	/* Initialize modem info */
 	err = modem_info_init();
@@ -137,14 +143,13 @@ void main(void)
 		LOG_ERR("Failed to initialize modem info: %d", err);
 	}
 
-	/* Print modem firmware version */
+	/* Log modem firmware version */
 	modem_info_string_get(MODEM_INFO_FW_VERSION, sbuf, sizeof(sbuf));
 	LOG_INF("Modem firmware version: %s", sbuf);
+	#endif
 
 	/* Print app firmware version */
 	LOG_INF("App firmware version: %s", CONFIG_MCUBOOT_IMAGE_VERSION);
-
-	LOG_INF("Started air quality monitor app");
 
 	/* Update Ostentus LEDS using bitmask (Power On and Battery)*/
 	led_bitmask(LED_POW | LED_BAT);
