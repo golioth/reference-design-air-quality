@@ -75,12 +75,6 @@ void app_work_sensor_read(void)
 
 	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
 		sensor_value_to_double(&batt_v), batt_lvl.val1);
-
-	snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V",
-		sensor_value_to_double(&batt_v));
-	snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
-	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
-	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
 	#endif
 
 	LOG_DBG("Collecting sensor measurements");
@@ -136,23 +130,31 @@ void app_work_sensor_read(void)
 	 *  -values should be sent as strings
 	 *  -use the enum from app_work.h for slide key values
 	 */
-	snprintk(json_buf, sizeof(json_buf), "%f C",
-		sensor_value_to_double(&bme280_sm.temperature));
+	snprintk(json_buf, sizeof(json_buf), "%d C", bme280_sm.temperature.val1);
 	slide_set(O_TEMPERATURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%f kPa",
-		sensor_value_to_double(&bme280_sm.pressure));
+
+	snprintk(json_buf, sizeof(json_buf), "%d kPa", bme280_sm.pressure.val1);
 	slide_set(O_PRESSURE, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%f %%RH",
-		sensor_value_to_double(&bme280_sm.humidity));
+
+	snprintk(json_buf, sizeof(json_buf), "%d %%RH", bme280_sm.humidity.val1);
 	slide_set(O_HUMIDITY, json_buf, strlen(json_buf));
+
 	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
 	slide_set(O_CO2, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
-		sensor_value_to_double(&sps30_sm.mc_2p5));
+
+	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
 	slide_set(O_PM2P5, json_buf, strlen(json_buf));
-	snprintk(json_buf, sizeof(json_buf), "%f ug/m^3",
-		sensor_value_to_double(&sps30_sm.mc_10p0));
+
+	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
 	slide_set(O_PM10P0, json_buf, strlen(json_buf));
+
+	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+	snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V", sensor_value_to_double(&batt_v));
+	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
+
+	snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
+	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
+	#endif
 }
 
 void app_work_init(struct golioth_client *work_client)
