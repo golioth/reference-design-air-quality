@@ -7,7 +7,6 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 
-#include <stdio.h>
 #include <net/golioth/system_client.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
@@ -77,9 +76,9 @@ void app_work_sensor_read(void)
 	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
 		sensor_value_to_double(&batt_v), batt_lvl.val1);
 
-	snprintf(batt_v_str, sizeof(batt_v_str), "%.2f V",
+	snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V",
 		sensor_value_to_double(&batt_v));
-	snprintf(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
+	snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
 	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
 	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
 	#endif
