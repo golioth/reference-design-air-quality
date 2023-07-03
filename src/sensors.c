@@ -45,7 +45,7 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 
 	k_mutex_lock(&bme280_mutex, K_FOREVER);
 
-	LOG_INF("Reading BME280 weather sensor");
+	LOG_DBG("Reading BME280 weather sensor");
 
 	err = sensor_sample_fetch(bme280_dev);
 	if (err) {
@@ -140,7 +140,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 
 	k_mutex_lock(&scd4x_mutex, K_FOREVER);
 
-	LOG_INF("Reading SCD4x CO₂ sensor (~%d seconds)",
+	LOG_DBG("Reading SCD4x CO₂ sensor (~%d seconds)",
 		SCD4X_MEASUREMENT_DURATION_USEC / 1000000);
 
 	/* Request a single-shot measurement */
@@ -349,7 +349,7 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	/* Get the number of samples to average from Golioth settings */
 	uint32_t samples = get_sps30_samples_per_measurement_s();
 
-	LOG_INF("Reading SPS30 PM sensor (averaging %u samples over ~%u"
+	LOG_DBG("Reading SPS30 PM sensor (averaging %u samples over ~%u"
 		" seconds)", samples, samples);
 
 	int count = 0;
