@@ -106,30 +106,30 @@ void app_work_sensor_read(void)
 	 *  -use the enum from app_work.h for slide key values
 	 */
 	snprintk(json_buf, sizeof(json_buf), "%d C", bme280_sm.temperature.val1);
-	slide_set(O_TEMPERATURE, json_buf, strlen(json_buf));
+	slide_set(TEMPERATURE, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%d kPa", bme280_sm.pressure.val1);
-	slide_set(O_PRESSURE, json_buf, strlen(json_buf));
+	slide_set(PRESSURE, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%d %%RH", bme280_sm.humidity.val1);
-	slide_set(O_HUMIDITY, json_buf, strlen(json_buf));
+	slide_set(HUMIDITY, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
-	slide_set(O_CO2, json_buf, strlen(json_buf));
+	slide_set(CO2, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
-	slide_set(O_PM2P5, json_buf, strlen(json_buf));
+	slide_set(PM2P5, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
-	slide_set(O_PM10P0, json_buf, strlen(json_buf));
+	slide_set(PM10P0, json_buf, strlen(json_buf));
 
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
 		   (snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V",
 			     sensor_value_to_double(&batt_v));
-		    slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
+		    slide_set(BATTERY_V, batt_v_str, strlen(batt_v_str));
 
 		    snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
-		    slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));));
+		    slide_set(BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));));
 }
 
 void app_work_init(struct golioth_client *work_client)

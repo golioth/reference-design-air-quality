@@ -7,17 +7,17 @@
 #ifndef __APP_WORK_H__
 #define __APP_WORK_H__
 
-#define O_LABEL_TEMPERATURE "Temperature"
-#define O_LABEL_PRESSURE    "Pressure"
-#define O_LABEL_HUMIDITY    "Humidity"
-#define O_LABEL_CO2	    "CO2"
-#define O_LABEL_PM2P5	    "PM2.5"
-#define O_LABEL_PM10P0	    "PM10.0"
+#define LABEL_TEMPERATURE "Temperature"
+#define LABEL_PRESSURE	  "Pressure"
+#define LABEL_HUMIDITY	  "Humidity"
+#define LABEL_CO2	  "CO2"
+#define LABEL_PM2P5	  "PM2.5"
+#define LABEL_PM10P0	  "PM10.0"
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-#define O_LABEL_BATTERY "Battery"
+#define LABEL_BATTERY "Battery"
 #endif
-#define O_LABEL_FIRMWARE "Firmware"
-#define O_SUMMARY_TITLE	 "Air Quality"
+#define LABEL_FIRMWARE "Firmware"
+#define SUMMARY_TITLE  "Air Quality"
 
 void app_work_init(struct golioth_client *work_client);
 void app_work_sensor_read(void);
@@ -27,17 +27,17 @@ void app_work_sensor_read(void);
  * inserting elements with the name of your choice to this enum.
  */
 typedef enum {
-	O_TEMPERATURE,
-	O_PRESSURE,
-	O_HUMIDITY,
-	O_CO2,
-	O_PM2P5,
-	O_PM10P0,
+	TEMPERATURE,
+	PRESSURE,
+	HUMIDITY,
+	CO2,
+	PM2P5,
+	PM10P0,
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-	O_BATTERY_V,
-	O_BATTERY_LVL,
+	BATTERY_V,
+	BATTERY_LVL,
 #endif
-	O_FIRMWARE
+	FIRMWARE
 } slide_key;
 
 #endif /* __APP_WORK_H__ */
