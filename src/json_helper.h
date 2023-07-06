@@ -16,7 +16,6 @@ struct air_quality_state {
 
 static const struct json_obj_descr air_quality_state_descr[] = {
 	JSON_OBJ_DESCR_PRIM(struct air_quality_state, example_int0, JSON_TOK_NUMBER),
-	JSON_OBJ_DESCR_PRIM(struct air_quality_state, example_int1, JSON_TOK_NUMBER)
-};
+	JSON_OBJ_DESCR_PRIM(struct air_quality_state, example_int1, JSON_TOK_NUMBER)};
 
 #endif

@@ -24,23 +24,9 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 static struct golioth_client *client;
 
 /* Formatting string for sending sensor JSON to Golioth */
-#define JSON_FMT "{\
-\"tem\":%f,\
-\"pre\":%f,\
-\"hum\":%f,\
-\"co2\":%u,\
-\"mc_1p0\":%f,\
-\"mc_2p5\":%f,\
-\"mc_4p0\":%f,\
-\"mc_10p0\":%f,\
-\"nc_0p5\":%f,\
-\"nc_1p0\":%f,\
-\"nc_2p5\":%f,\
-\"nc_4p0\":%f,\
-\"nc_10p0\":%f,\
-\"tps\":%f,\
-\"batt_v\":%f,\
-\"batt_lvl\":%f}"
+/* clang-format off */
+#define JSON_FMT "{\"tem\":%f,\"pre\":%f,\"hum\":%f,\"co2\":%u,\"mc_1p0\":%f,\"mc_2p5\":%f,\"mc_4p0\":%f,\"mc_10p0\":%f,\"nc_0p5\":%f,\"nc_1p0\":%f,\"nc_2p5\":%f,\"nc_4p0\":%f,\"nc_10p0\":%f,\"tps\":%f,\"batt_v\":%f,\"batt_lvl\":%f}"
+/* clang-format on */
 
 /* Callback for LightDB Stream */
 static int async_error_handler(struct golioth_req_rsp *rsp)
@@ -63,19 +49,19 @@ void app_work_sensor_read(void)
 	struct scd4x_sensor_measurement scd4x_sm;
 	struct sps30_sensor_measurement sps30_sm;
 	char json_buf[512];
-	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 	char batt_v_str[7];
 	char batt_lvl_str[5];
-	#endif
+#endif
 
 	LOG_DBG("Collecting battery measurements");
 
-	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 	read_battery_info(&batt_v, &batt_lvl);
 
-	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
-		sensor_value_to_double(&batt_v), batt_lvl.val1);
-	#endif
+	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%", sensor_value_to_double(&batt_v),
+		batt_lvl.val1);
+#endif
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -101,27 +87,20 @@ void app_work_sensor_read(void)
 	LOG_DBG("Sending sensor data to Golioth");
 
 	snprintk(json_buf, sizeof(json_buf), JSON_FMT,
-		sensor_value_to_double(&bme280_sm.temperature),
-		sensor_value_to_double(&bme280_sm.pressure),
-		sensor_value_to_double(&bme280_sm.humidity),
-		scd4x_sm.co2,
-		sensor_value_to_double(&sps30_sm.mc_1p0),
-		sensor_value_to_double(&sps30_sm.mc_2p5),
-		sensor_value_to_double(&sps30_sm.mc_4p0),
-		sensor_value_to_double(&sps30_sm.mc_10p0),
-		sensor_value_to_double(&sps30_sm.nc_0p5),
-		sensor_value_to_double(&sps30_sm.nc_1p0),
-		sensor_value_to_double(&sps30_sm.nc_2p5),
-		sensor_value_to_double(&sps30_sm.nc_4p0),
-		sensor_value_to_double(&sps30_sm.nc_10p0),
-		sensor_value_to_double(&sps30_sm.typical_particle_size),
-		sensor_value_to_double(&batt_v),
-		sensor_value_to_double(&batt_lvl));
+		 sensor_value_to_double(&bme280_sm.temperature),
+		 sensor_value_to_double(&bme280_sm.pressure),
+		 sensor_value_to_double(&bme280_sm.humidity), scd4x_sm.co2,
+		 sensor_value_to_double(&sps30_sm.mc_1p0), sensor_value_to_double(&sps30_sm.mc_2p5),
+		 sensor_value_to_double(&sps30_sm.mc_4p0),
+		 sensor_value_to_double(&sps30_sm.mc_10p0),
+		 sensor_value_to_double(&sps30_sm.nc_0p5), sensor_value_to_double(&sps30_sm.nc_1p0),
+		 sensor_value_to_double(&sps30_sm.nc_2p5), sensor_value_to_double(&sps30_sm.nc_4p0),
+		 sensor_value_to_double(&sps30_sm.nc_10p0),
+		 sensor_value_to_double(&sps30_sm.typical_particle_size),
+		 sensor_value_to_double(&batt_v), sensor_value_to_double(&batt_lvl));
 
-	err = golioth_stream_push_cb(client, "sensor",
-		GOLIOTH_CONTENT_FORMAT_APP_JSON,
-		json_buf, strlen(json_buf),
-		async_error_handler, NULL);
+	err = golioth_stream_push_cb(client, "sensor", GOLIOTH_CONTENT_FORMAT_APP_JSON, json_buf,
+				     strlen(json_buf), async_error_handler, NULL);
 	if (err) {
 		LOG_ERR("Failed to send sensor data to Golioth: %d", err);
 	}
@@ -148,13 +127,13 @@ void app_work_sensor_read(void)
 	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
 	slide_set(O_PM10P0, json_buf, strlen(json_buf));
 
-	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 	snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V", sensor_value_to_double(&batt_v));
 	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
 
 	snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
 	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
-	#endif
+#endif
 }
 
 void app_work_init(struct golioth_client *work_client)

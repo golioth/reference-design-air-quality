@@ -43,19 +43,17 @@ void app_state_init(struct golioth_client *state_client)
 
 static void reset_desired_state(void)
 {
-	LOG_INF("Resetting \"%s\" LightDB State endpoint to defaults.",
-			APP_STATE_DESIRED_ENDP
-			);
+	LOG_INF("Resetting \"%s\" LightDB State endpoint to defaults.", APP_STATE_DESIRED_ENDP);
 
-	char sbuf[strlen(DEVICE_STATE_FMT)+8]; /* small bit of extra space */
+	char sbuf[strlen(DEVICE_STATE_FMT) + 8]; /* small bit of extra space */
 
 	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, -1, -1);
 
 	int err;
 
 	err = golioth_lightdb_set_cb(client, APP_STATE_DESIRED_ENDP,
-			GOLIOTH_CONTENT_FORMAT_APP_JSON, sbuf, strlen(sbuf),
-			async_handler, NULL);
+				     GOLIOTH_CONTENT_FORMAT_APP_JSON, sbuf, strlen(sbuf),
+				     async_handler, NULL);
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
@@ -64,15 +62,14 @@ static void reset_desired_state(void)
 void app_state_update_actual(void)
 {
 
-	char sbuf[strlen(DEVICE_STATE_FMT)+8]; /* small bit of extra space */
+	char sbuf[strlen(DEVICE_STATE_FMT) + 8]; /* small bit of extra space */
 
 	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, _example_int0, _example_int1);
 
 	int err;
 
-	err = golioth_lightdb_set_cb(client, APP_STATE_ACTUAL_ENDP,
-			GOLIOTH_CONTENT_FORMAT_APP_JSON, sbuf, strlen(sbuf),
-			async_handler, NULL);
+	err = golioth_lightdb_set_cb(client, APP_STATE_ACTUAL_ENDP, GOLIOTH_CONTENT_FORMAT_APP_JSON,
+				     sbuf, strlen(sbuf), async_handler, NULL);
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
@@ -89,9 +86,8 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 
 	struct air_quality_state parsed_state;
 
-	int ret = json_obj_parse((char *)rsp->data, rsp->len,
-			air_quality_state_descr, ARRAY_SIZE(air_quality_state_descr),
-			&parsed_state);
+	int ret = json_obj_parse((char *)rsp->data, rsp->len, air_quality_state_descr,
+				 ARRAY_SIZE(air_quality_state_descr), &parsed_state);
 
 	if (ret < 0) {
 		LOG_ERR("Error parsing desired values: %d", ret);
@@ -102,31 +98,35 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 	uint8_t desired_processed_count = 0;
 	uint8_t state_change_count = 0;
 
-	if (ret & 1<<0) {
+	if (ret & 1 << 0) {
 		/* Process example_int0 */
 		if ((parsed_state.example_int0 >= 0) && (parsed_state.example_int0 < 10000)) {
-			LOG_DBG("Validated desired example_int0 value: %d", parsed_state.example_int0);
+			LOG_DBG("Validated desired example_int0 value: %d",
+				parsed_state.example_int0);
 			_example_int0 = parsed_state.example_int0;
 			++desired_processed_count;
 			++state_change_count;
 		} else if (parsed_state.example_int0 == -1) {
 			LOG_DBG("No change requested for example_int0");
 		} else {
-			LOG_ERR("Invalid desired example_int0 value: %d", parsed_state.example_int0);
+			LOG_ERR("Invalid desired example_int0 value: %d",
+				parsed_state.example_int0);
 			++desired_processed_count;
 		}
 	}
-	if (ret & 1<<1) {
+	if (ret & 1 << 1) {
 		/* Process example_int1 */
 		if ((parsed_state.example_int1 >= 0) && (parsed_state.example_int1 < 10000)) {
-			LOG_DBG("Validated desired example_int1 value: %d", parsed_state.example_int1);
+			LOG_DBG("Validated desired example_int1 value: %d",
+				parsed_state.example_int1);
 			_example_int1 = parsed_state.example_int1;
 			++desired_processed_count;
 			++state_change_count;
 		} else if (parsed_state.example_int1 == -1) {
 			LOG_DBG("No change requested for example_int1");
 		} else {
-			LOG_ERR("Invalid desired example_int1 value: %d", parsed_state.example_int1);
+			LOG_ERR("Invalid desired example_int1 value: %d",
+				parsed_state.example_int1);
 			++desired_processed_count;
 		}
 	}
@@ -147,7 +147,8 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 void app_state_observe(void)
 {
 	int err = golioth_lightdb_observe_cb(client, APP_STATE_DESIRED_ENDP,
-			GOLIOTH_CONTENT_FORMAT_APP_JSON, app_state_desired_handler, NULL);
+					     GOLIOTH_CONTENT_FORMAT_APP_JSON,
+					     app_state_desired_handler, NULL);
 	if (err) {
 		LOG_WRN("failed to observe lightdb path: %d", err);
 	}

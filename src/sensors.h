@@ -7,28 +7,28 @@
 #include <zephyr/drivers/sensor.h>
 
 struct bme280_sensor_measurement {
-    struct sensor_value temperature;
+	struct sensor_value temperature;
 	struct sensor_value pressure;
 	struct sensor_value humidity;
 };
 
 struct scd4x_sensor_measurement {
-    uint16_t co2;
+	uint16_t co2;
 	struct sensor_value temperature;
 	struct sensor_value humidity;
 };
 
 struct sps30_sensor_measurement {
-    struct sensor_value mc_1p0;
-    struct sensor_value mc_2p5;
-    struct sensor_value mc_4p0;
-    struct sensor_value mc_10p0;
-    struct sensor_value nc_0p5;
-    struct sensor_value nc_1p0;
-    struct sensor_value nc_2p5;
-    struct sensor_value nc_4p0;
-    struct sensor_value nc_10p0;
-    struct sensor_value typical_particle_size;
+	struct sensor_value mc_1p0;
+	struct sensor_value mc_2p5;
+	struct sensor_value mc_4p0;
+	struct sensor_value mc_10p0;
+	struct sensor_value nc_0p5;
+	struct sensor_value nc_1p0;
+	struct sensor_value nc_2p5;
+	struct sensor_value nc_4p0;
+	struct sensor_value nc_10p0;
+	struct sensor_value typical_particle_size;
 };
 
 int bme280_sensor_init(void);

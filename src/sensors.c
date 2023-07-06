@@ -54,19 +54,15 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 		return err;
 	}
 
-	sensor_channel_get(bme280_dev, SENSOR_CHAN_AMBIENT_TEMP,
-		&measurement->temperature);
-	sensor_channel_get(bme280_dev, SENSOR_CHAN_PRESS,
-		&measurement->pressure);
-	sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY,
-		&measurement->humidity);
+	sensor_channel_get(bme280_dev, SENSOR_CHAN_AMBIENT_TEMP, &measurement->temperature);
+	sensor_channel_get(bme280_dev, SENSOR_CHAN_PRESS, &measurement->pressure);
+	sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY, &measurement->humidity);
 
 	LOG_INF("bme280: Temperature=%f °C, Pressure=%f kPa,"
 		" Humidity=%f %%RH",
 		sensor_value_to_double(&measurement->temperature),
 		sensor_value_to_double(&measurement->pressure),
-		sensor_value_to_double(&measurement->humidity)
-	);
+		sensor_value_to_double(&measurement->humidity));
 
 	k_mutex_unlock(&bme280_mutex);
 
@@ -97,8 +93,7 @@ int scd4x_sensor_init(void)
 
 	err = scd4x_stop_periodic_measurement();
 	if (err) {
-		LOG_ERR("Error %d: SCD4x stop periodic measurement failed",
-			err);
+		LOG_ERR("Error %d: SCD4x stop periodic measurement failed", err);
 		k_mutex_unlock(&scd4x_mutex);
 		return err;
 	}
@@ -117,8 +112,7 @@ int scd4x_sensor_init(void)
 		k_mutex_unlock(&scd4x_mutex);
 		return err;
 	} else {
-		LOG_INF("SCD4x serial number: 0x%04x%04x%04x", serial_0,
-			serial_1, serial_2);
+		LOG_INF("SCD4x serial number: 0x%04x%04x%04x", serial_0, serial_1, serial_2);
 	}
 
 	/* According to the datasheet, the first reading obtained after waking
@@ -147,7 +141,8 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	err = scd4x_measure_single_shot();
 	if (err) {
 		LOG_ERR("Error entering SCD4x single-shot measurement mode"
-			" (error: %d)", err);
+			" (error: %d)",
+			err);
 		k_mutex_unlock(&scd4x_mutex);
 		return err;
 	}
@@ -156,12 +151,12 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	sensirion_i2c_hal_sleep_usec(SCD4X_MEASUREMENT_DURATION_USEC);
 
 	/* Poll the sensor every 0.1s waiting for the data ready status */
-	while (!data_ready_flag)
-	{
+	while (!data_ready_flag) {
 		err = scd4x_get_data_ready_flag(&data_ready_flag);
 		if (err) {
 			LOG_ERR("Error reading SCD4x data ready status flag: "
-				"%d", err);
+				"%d",
+				err);
 			k_mutex_unlock(&scd4x_mutex);
 			return err;
 		}
@@ -170,8 +165,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	}
 
 	/* Read the single-shot measurement */
-	err = scd4x_read_measurement(&co2_ppm, &temperature_m_deg_c,
-		&humidity_m_percent_rh);
+	err = scd4x_read_measurement(&co2_ppm, &temperature_m_deg_c, &humidity_m_percent_rh);
 	if (err) {
 		LOG_ERR("Error reading SCD4x measurement: %d", err);
 		k_mutex_unlock(&scd4x_mutex);
@@ -186,17 +180,12 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	humidity_percent_rh = humidity_m_percent_rh / 1000.0;
 
 	measurement->co2 = co2_ppm;
-	sensor_value_from_double(&measurement->temperature,
-		temperature_deg_c);
-	sensor_value_from_double(&measurement->humidity,
-		humidity_percent_rh);
+	sensor_value_from_double(&measurement->temperature, temperature_deg_c);
+	sensor_value_from_double(&measurement->humidity, humidity_percent_rh);
 
 	LOG_INF("scd4x: CO₂=%u ppm, Temperature=%f °C,"
 		" Humidity=%f %%RH",
-		co2_ppm,
-		temperature_deg_c,
-		humidity_percent_rh
-	);
+		co2_ppm, temperature_deg_c, humidity_percent_rh);
 
 	k_mutex_unlock(&scd4x_mutex);
 
@@ -211,11 +200,9 @@ int scd4x_sensor_set_temperature_offset(int32_t t_offset_m_deg_c)
 
 	err = scd4x_set_temperature_offset(t_offset_m_deg_c);
 	if (err) {
-		LOG_ERR("Error setting SCD4x temperature offset (error: %d)",
-			err);
+		LOG_ERR("Error setting SCD4x temperature offset (error: %d)", err);
 	} else {
-		LOG_INF("Set SCD4x temperature offset setting to %d m°C",
-			t_offset_m_deg_c);
+		LOG_INF("Set SCD4x temperature offset setting to %d m°C", t_offset_m_deg_c);
 	}
 
 	k_mutex_unlock(&scd4x_mutex);
@@ -231,11 +218,9 @@ int scd4x_sensor_set_sensor_altitude(int16_t sensor_altitude)
 
 	err = scd4x_set_sensor_altitude(sensor_altitude);
 	if (err) {
-		LOG_ERR("Error setting SCD4x altitude (error: %d)",
-			err);
+		LOG_ERR("Error setting SCD4x altitude (error: %d)", err);
 	} else {
-		LOG_INF("Set SCD4x altitude setting to %d meters",
-			sensor_altitude);
+		LOG_INF("Set SCD4x altitude setting to %d meters", sensor_altitude);
 	}
 
 	k_mutex_unlock(&scd4x_mutex);
@@ -252,7 +237,8 @@ int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
 	err = scd4x_set_automatic_self_calibration(asc_enabled);
 	if (err) {
 		LOG_ERR("Error setting SCD4x automatic self-calibration"
-			" (error: %d)", err);
+			" (error: %d)",
+			err);
 	} else {
 		if (asc_enabled) {
 			LOG_INF("Enabled SCD4x automatic self-calibration");
@@ -304,8 +290,7 @@ int sps30_sensor_init(void)
 
 	err = sps30_read_firmware_version(&fw_major, &fw_minor);
 	if (err) {
-		LOG_ERR("Error reading SPS30 firmware version (error: %d)",
-			err);
+		LOG_ERR("Error reading SPS30 firmware version (error: %d)", err);
 		k_mutex_unlock(&sps30_mutex);
 		return err;
 	} else {
@@ -323,8 +308,7 @@ int sps30_sensor_init(void)
 
 	err = sps30_start_measurement();
 	if (err) {
-		LOG_ERR("Error entering SPS30 measurement mode (error: %d)",
-			err);
+		LOG_ERR("Error entering SPS30 measurement mode (error: %d)", err);
 		k_mutex_unlock(&sps30_mutex);
 		return err;
 	}
@@ -350,18 +334,19 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	uint32_t samples = get_sps30_samples_per_measurement_s();
 
 	LOG_DBG("Reading SPS30 PM sensor (averaging %u samples over ~%u"
-		" seconds)", samples, samples);
+		" seconds)",
+		samples, samples);
 
 	int count = 0;
 	while (count < samples) {
 		/* Poll the sensor every 0.1s waiting for the data ready status */
 		/* Data should be ready every 1s */
-		while (!data_ready_flag)
-		{
+		while (!data_ready_flag) {
 			err = sps30_read_data_ready(&data_ready_flag);
 			if (err) {
 				LOG_ERR("Error reading SPS30 data ready status flag: "
-					"%d", err);
+					"%d",
+					err);
 				k_mutex_unlock(&sps30_mutex);
 				return err;
 			}
@@ -414,7 +399,7 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	sensor_value_from_double(&measurement->nc_4p0, sps30_meas_avg.nc_4p0);
 	sensor_value_from_double(&measurement->nc_10p0, sps30_meas_avg.nc_10p0);
 	sensor_value_from_double(&measurement->typical_particle_size,
-		sps30_meas_avg.typical_particle_size);
+				 sps30_meas_avg.typical_particle_size);
 
 	LOG_INF("sps30: "
 		"PM1.0=%f μg/m³, PM2.5=%f μg/m³, "
@@ -422,17 +407,10 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 		"NC0.5=%f #/cm³, NC1.0=%f #/cm³, "
 		"NC2.5=%f #/cm³, NC4.0=%f #/cm³, "
 		"NC10.0=%f #/cm³, Typical Particle Size=%f μm",
-		sps30_meas_avg.mc_1p0,
-		sps30_meas_avg.mc_2p5,
-		sps30_meas_avg.mc_4p0,
-		sps30_meas_avg.mc_10p0,
-		sps30_meas_avg.nc_0p5,
-		sps30_meas_avg.nc_1p0,
-		sps30_meas_avg.nc_2p5,
-		sps30_meas_avg.nc_4p0,
-		sps30_meas_avg.nc_10p0,
-		sps30_meas_avg.typical_particle_size
-	);
+		sps30_meas_avg.mc_1p0, sps30_meas_avg.mc_2p5, sps30_meas_avg.mc_4p0,
+		sps30_meas_avg.mc_10p0, sps30_meas_avg.nc_0p5, sps30_meas_avg.nc_1p0,
+		sps30_meas_avg.nc_2p5, sps30_meas_avg.nc_4p0, sps30_meas_avg.nc_10p0,
+		sps30_meas_avg.typical_particle_size);
 
 	k_mutex_unlock(&sps30_mutex);
 
@@ -448,10 +426,12 @@ int sps30_sensor_set_fan_auto_cleaning_interval(uint32_t interval_seconds)
 	err = sps30_set_fan_auto_cleaning_interval(interval_seconds);
 	if (err) {
 		LOG_ERR("Error setting SPS30 automatic fan cleaning"
-			" interval (error: %d)", err);
+			" interval (error: %d)",
+			err);
 	} else {
 		LOG_INF("Set SPS30 automatic fan cleaning interval to %d"
-			" second(s)", interval_seconds);
+			" second(s)",
+			interval_seconds);
 	}
 
 	k_mutex_unlock(&sps30_mutex);

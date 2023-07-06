@@ -31,17 +31,16 @@ K_SEM_DEFINE(dfu_status_update, 0, 1);
 
 static k_tid_t _system_thread = 0;
 
-static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(
-		DT_ALIAS(golioth_led), gpios);
-static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(
-		DT_ALIAS(sw1), gpios);
+static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(DT_ALIAS(golioth_led), gpios);
+static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
 static struct gpio_callback button_cb_data;
 
 /* forward declarations */
 void golioth_connection_led_set(uint8_t state);
 void network_led_set(uint8_t state);
 
-void wake_system_thread(void) {
+void wake_system_thread(void)
+{
 	k_wakeup(_system_thread);
 }
 
@@ -59,10 +58,12 @@ static void golioth_on_connect(struct golioth_client *client)
 	if (initial_connection) {
 		initial_connection = false;
 
-		/* Report current DFU version to Golioth */
-		//FIXME: we can't call this here because it's sync (deadlock)
- 		//app_dfu_report_state_to_golioth();
-		//This semaphore is a workaround
+		/*
+		 * Report current DFU version to Golioth
+		 * FIXME: we can't call this here because it's sync (deadlock)
+		 * app_dfu_report_state_to_golioth();
+		 * This semaphore is a workaround
+		 */
 		k_sem_give(&dfu_status_update);
 
 		/* Indicate connection using LEDs */
@@ -75,7 +76,7 @@ static void lte_handler(const struct lte_lc_evt *const evt)
 	switch (evt->type) {
 	case LTE_LC_EVT_NW_REG_STATUS:
 		if ((evt->nw_reg_status != LTE_LC_NW_REG_REGISTERED_HOME) &&
-		 (evt->nw_reg_status != LTE_LC_NW_REG_REGISTERED_ROAMING)) {
+		    (evt->nw_reg_status != LTE_LC_NW_REG_REGISTERED_ROAMING)) {
 			break;
 		}
 
@@ -97,20 +98,20 @@ static void lte_handler(const struct lte_lc_evt *const evt)
 	case LTE_LC_EVT_MODEM_SLEEP_ENTER:
 		/* Callback events carrying LTE link data */
 		break;
-	 default:
+	default:
 		break;
 	}
 }
 
-void button_pressed(const struct device *dev, struct gpio_callback *cb,
-					uint32_t pins)
+void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	LOG_DBG("Button pressed at %d", k_cycle_get_32());
 	k_wakeup(_system_thread);
 }
 
 /* Set (unset) LED indicators for active Golioth connection */
-void golioth_connection_led_set(uint8_t state) {
+void golioth_connection_led_set(uint8_t state)
+{
 	uint8_t pin_state = state ? 1 : 0;
 	/* Turn on Golioth logo LED once connected */
 	gpio_pin_set_dt(&golioth_led, pin_state);
@@ -119,7 +120,8 @@ void golioth_connection_led_set(uint8_t state) {
 }
 
 /* Set (unset) LED indicators for active internet connection */
-void network_led_set(uint8_t state) {
+void network_led_set(uint8_t state)
+{
 	uint8_t pin_state = state ? 1 : 0;
 	/* Change the state of the Internet LED on Ostentus */
 	led_internet_set(pin_state);
@@ -134,7 +136,7 @@ void main(void)
 
 	LOG_INF("Started air quality monitor app");
 
-	#ifdef CONFIG_MODEM_INFO
+#ifdef CONFIG_MODEM_INFO
 	char sbuf[128];
 
 	/* Initialize modem info */
@@ -146,7 +148,7 @@ void main(void)
 	/* Log modem firmware version */
 	modem_info_string_get(MODEM_INFO_FW_VERSION, sbuf, sizeof(sbuf));
 	LOG_INF("Modem firmware version: %s", sbuf);
-	#endif
+#endif
 
 	/* Print app firmware version */
 	LOG_INF("App firmware version: %s", CONFIG_MCUBOOT_IMAGE_VERSION);
@@ -197,28 +199,27 @@ void main(void)
 		/* Block until connected to Golioth */
 		k_sem_take(&connected, K_FOREVER);
 
-	} else if (IS_ENABLED(CONFIG_SOC_NRF9160)){
+	} else if (IS_ENABLED(CONFIG_SOC_NRF9160)) {
 		LOG_INF("Connecting to LTE network. This may take a few minutes...");
 		err = lte_lc_init_and_connect_async(lte_handler);
 		if (err) {
-			 printk("lte_lc_init_and_connect_async, error: %d\n", err);
-			 return;
+			printk("lte_lc_init_and_connect_async, error: %d\n", err);
+			return;
 		}
 	}
 
 	/* Set up user button */
 	err = gpio_pin_configure_dt(&user_btn, GPIO_INPUT);
 	if (err != 0) {
-		printk("Error %d: failed to configure %s pin %d\n",
-			err, user_btn.port->name, user_btn.pin);
+		printk("Error %d: failed to configure %s pin %d\n", err, user_btn.port->name,
+		       user_btn.pin);
 		return;
 	}
 
-	err = gpio_pin_interrupt_configure_dt(&user_btn,
-		GPIO_INT_EDGE_TO_ACTIVE);
+	err = gpio_pin_interrupt_configure_dt(&user_btn, GPIO_INT_EDGE_TO_ACTIVE);
 	if (err != 0) {
-		printk("Error %d: failed to configure interrupt on %s pin %d\n",
-			err, user_btn.port->name, user_btn.pin);
+		printk("Error %d: failed to configure interrupt on %s pin %d\n", err,
+		       user_btn.port->name, user_btn.pin);
 		return;
 	}
 
@@ -236,10 +237,10 @@ void main(void)
 	slide_add(O_TEMPERATURE, O_LABEL_TEMPERATURE, strlen(O_LABEL_TEMPERATURE));
 	slide_add(O_PRESSURE, O_LABEL_PRESSURE, strlen(O_LABEL_PRESSURE));
 	slide_add(O_HUMIDITY, O_LABEL_HUMIDITY, strlen(O_LABEL_HUMIDITY));
-	#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
+#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 	slide_add(O_BATTERY_V, O_LABEL_BATTERY, strlen(O_LABEL_BATTERY));
 	slide_add(O_BATTERY_LVL, O_LABEL_BATTERY, strlen(O_LABEL_BATTERY));
-	#endif
+#endif
 	slide_add(O_FIRMWARE, O_LABEL_FIRMWARE, strlen(O_LABEL_FIRMWARE));
 
 	/* Set the title ofthe Ostentus summary slide (optional) */

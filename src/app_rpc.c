@@ -50,10 +50,9 @@ static void reset_pm_sensor_work_handler(struct k_work *work)
 }
 K_WORK_DEFINE(reset_pm_sensor_work, reset_pm_sensor_work_handler);
 
-static enum golioth_rpc_status on_set_log_level(
-	QCBORDecodeContext *request_params_array,
-	QCBOREncodeContext *response_detail_map,
-	void *callback_arg)
+static enum golioth_rpc_status on_set_log_level(QCBORDecodeContext *request_params_array,
+						QCBOREncodeContext *response_detail_map,
+						void *callback_arg)
 {
 	double a;
 	uint32_t log_level;
@@ -62,8 +61,7 @@ static enum golioth_rpc_status on_set_log_level(
 	QCBORDecode_GetDouble(request_params_array, &a);
 	qerr = QCBORDecode_GetError(request_params_array);
 	if (qerr != QCBOR_SUCCESS) {
-		LOG_ERR("Failed to decode array item: %d (%s)", qerr,
-		qcbor_err_to_str(qerr));
+		LOG_ERR("Failed to decode array item: %d (%s)", qerr, qcbor_err_to_str(qerr));
 		return GOLIOTH_RPC_INVALID_ARGUMENT;
 	}
 
@@ -84,38 +82,34 @@ static enum golioth_rpc_status on_set_log_level(
 			break;
 		}
 
-		LOG_WRN("Settings %s log level to: %d", source_name,
-		log_level);
+		LOG_WRN("Settings %s log level to: %d", source_name, log_level);
 		log_filter_set(NULL, 0, source_id, log_level);
 		++source_id;
 	}
 	return GOLIOTH_RPC_OK;
 }
 
-static enum golioth_rpc_status on_reboot(
-	QCBORDecodeContext *request_params_array,
-	QCBOREncodeContext *response_detail_map,
-	void *callback_arg)
+static enum golioth_rpc_status on_reboot(QCBORDecodeContext *request_params_array,
+					 QCBOREncodeContext *response_detail_map,
+					 void *callback_arg)
 {
 	k_work_submit(&reboot_work);
 
 	return GOLIOTH_RPC_OK;
 }
 
-static enum golioth_rpc_status on_clean_pm_sensor(
-	QCBORDecodeContext *request_params_array,
-	QCBOREncodeContext *response_detail_map,
-	void *callback_arg)
+static enum golioth_rpc_status on_clean_pm_sensor(QCBORDecodeContext *request_params_array,
+						  QCBOREncodeContext *response_detail_map,
+						  void *callback_arg)
 {
 	k_work_submit(&clean_pm_sensor_work);
 
 	return GOLIOTH_RPC_OK;
 }
 
-static enum golioth_rpc_status on_reset_pm_sensor(
-	QCBORDecodeContext *request_params_array,
-	QCBOREncodeContext *response_detail_map,
-	void *callback_arg)
+static enum golioth_rpc_status on_reset_pm_sensor(QCBORDecodeContext *request_params_array,
+						  QCBOREncodeContext *response_detail_map,
+						  void *callback_arg)
 {
 	k_work_submit(&reset_pm_sensor_work);
 
@@ -152,16 +146,13 @@ int app_register_rpc(struct golioth_client *rpc_client)
 	err = golioth_rpc_register(rpc_client, "reboot", on_reboot, NULL);
 	rpc_log_if_register_failure(err);
 
-	err = golioth_rpc_register(rpc_client, "set_log_level",
-		on_set_log_level, NULL);
+	err = golioth_rpc_register(rpc_client, "set_log_level", on_set_log_level, NULL);
 	rpc_log_if_register_failure(err);
 
-	err = golioth_rpc_register(rpc_client, "clean_pm_sensor",
-		on_clean_pm_sensor, NULL);
+	err = golioth_rpc_register(rpc_client, "clean_pm_sensor", on_clean_pm_sensor, NULL);
 	rpc_log_if_register_failure(err);
 
-	err = golioth_rpc_register(rpc_client, "reset_pm_sensor",
-		on_reset_pm_sensor, NULL);
+	err = golioth_rpc_register(rpc_client, "reset_pm_sensor", on_reset_pm_sensor, NULL);
 	rpc_log_if_register_failure(err);
 
 	return err;
