@@ -49,19 +49,15 @@ void app_work_sensor_read(void)
 	struct scd4x_sensor_measurement scd4x_sm;
 	struct sps30_sensor_measurement sps30_sm;
 	char json_buf[512];
-#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-	char batt_v_str[7];
-	char batt_lvl_str[5];
-#endif
+	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (char batt_v_str[7]; char batt_lvl_str[5];));
 
 	LOG_DBG("Collecting battery measurements");
 
-#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-	read_battery_info(&batt_v, &batt_lvl);
+	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
+		   (read_battery_info(&batt_v, &batt_lvl);
 
-	LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%", sensor_value_to_double(&batt_v),
-		batt_lvl.val1);
-#endif
+		    LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
+			    sensor_value_to_double(&batt_v), batt_lvl.val1);));
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -127,13 +123,13 @@ void app_work_sensor_read(void)
 	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
 	slide_set(O_PM10P0, json_buf, strlen(json_buf));
 
-#ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-	snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V", sensor_value_to_double(&batt_v));
-	slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
+	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
+		   (snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V",
+			     sensor_value_to_double(&batt_v));
+		    slide_set(O_BATTERY_V, batt_v_str, strlen(batt_v_str));
 
-	snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
-	slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));
-#endif
+		    snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
+		    slide_set(O_BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));));
 }
 
 void app_work_init(struct golioth_client *work_client)
