@@ -1,3 +1,7 @@
+..
+   Copyright (c) 2023 Golioth, Inc.
+   SPDX-License-Identifier: Apache-2.0
+
 Air Quality Monitor
 ###################
 
@@ -42,10 +46,6 @@ Use ``west`` to initialize and install
    west update
    west zephyr-export
    pip install -r deps/zephyr/scripts/requirements.txt
-   source deps/zephyr/zephyr-env.sh
-
-This will also install the `golioth-zephyr-boards`_ definitions for the Golioth
-Aludel-Mini carrier board.
 
 Building the application
 ************************
@@ -63,7 +63,7 @@ functionality on this Reference Design.
 
 .. code-block:: console
 
-   $ (.venv) west build -b aludel_mini_v1_sparkfun9160_ns app -- -DCONFIG_MCUBOOT_IMAGE_VERSION=\"<your.semantic.version>\"
+   $ (.venv) west build -p -b aludel_mini_v1_sparkfun9160_ns app -- -DCONFIG_MCUBOOT_IMAGE_VERSION=\"<your.semantic.version>\"
    $ (.venv) west flash
 
 Configure PSK-ID and PSK using the device shell based on your Golioth
@@ -79,7 +79,7 @@ Golioth Features
 ****************
 
 This app currently implements Over-the-Air (OTA) firmware updates, Settings
-Service, Logging, and RPC.
+Service, Logging, RPC, and both LightDB State and LightDB Stream data.
 
 Settings Service
 ================
@@ -131,6 +131,9 @@ Remote Procedure Call (RPC) Service
 The following RPCs can be initiated in the Remote Procedure Call menu of the
 `Golioth Console`_.
 
+``get_network_info``
+   Query and return network information.
+
 ``reboot``
    Reboot the system.
 
@@ -153,8 +156,57 @@ The following RPCs can be initiated in the Remote Procedure Call menu of the
 ``reset_pm_sensor``
    Reset the SPS30 particulate matter sensor.
 
-.. _Golioth Console: https://console.golioth.io
-.. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
+LightDB State and LightDB Stream data
+=====================================
+
+Time-Series Data (LightDB Stream)
+---------------------------------
+
+Sensor data is periodicaly sent to the following ``sensor/*`` endpoints of the
+LightDB Stream service:
+
+* ``sensor/tem``: Temperature (°C)
+* ``sensor/pre``: Pressure (kPa)
+* ``sensor/hum``: Humidity (%RH)
+* ``sensor/co2``: CO₂ (ppm)
+* ``sensor/mc_1p0``: Particulate Matter Mass Concentration 1.0 (μg/m³)
+* ``sensor/mc_2p5``: Particulate Matter Mass Concentration 2.5 (μg/m³)
+* ``sensor/mc_4p0``: Particulate Matter Mass Concentration 4.0 (μg/m³)
+* ``sensor/mc_10p0``: Particulate Matter Mass Concentration 10.0 (μg/m³)
+* ``sensor/nc_0p5``: Particulate Matter Number Concentration 0.5 (#/cm³)
+* ``sensor/nc_1p0``: Particulate Matter Number Concentration 1.0 (#/cm³)
+* ``sensor/nc_2p5``: Particulate Matter Number Concentration 2.5 (#/cm³)
+* ``sensor/nc_4p0``: Particulate Matter Number Concentration 4.0 (#/cm³)
+* ``sensor/nc_10p0``: Particulate Matter Number Concentration 10.0 (#/cm³)
+* ``sensor/tps``: Typical Particle Size (μm)
+
+Battery voltage and level readings are periodically sent to the following
+``battery/*`` endpoints:
+
+* ``battery/batt_v``: Battery Voltage (V)
+* ``battery/batt_lvl``: Battery Level (%)
+
+Stateful Data (LightDB State)
+-----------------------------
+
+The concept of Digital Twin is demonstrated with the LightDB State
+``example_int0`` and ``example_int1`` variables that are members of the ``desired``
+and ``actual`` endpoints.
+
+* ``desired`` values may be changed from the cloud side. The device will recognize
+  these, validate them for [0..65535] bounding, and then reset these endpoints
+  to ``-1``
+
+* ``actual`` values will be updated by the device whenever a valid value is
+  received from the ``desired`` endpoints. The cloud may read the ``actual``
+  endpoints to determine device status, but only the device should ever write to
+  the ``actual`` endpoints.
+
+Further Information in Header Files
+===================================
+
+Please refer to the comments in each header file for a service-by-service
+explanation of this template.
 
 Hardware Variations
 *******************
@@ -165,18 +217,33 @@ Nordic nRF9160 DK
 This reference design may be built for the `Nordic nRF9160 DK`_, with the
 `MikroE Arduino UNO click shield`_ to interface the two click boards.
 
-* Position the FIXME click in Slot 1
-* Position the FIXME click in Slot 2
+* Position the `MikroE Weather Click`_ board in Slot 1
+* Position the `MikroE HVAC Click`_ board in Slot 2
 
 Use the following commands to build and program. (Use the same console commands
 from above to provision this board after programming the firmware.)
 
 .. code-block:: console
 
-   $ (.venv) west build -b nrf9160dk_nrf9160_ns app -- -DCONFIG_MCUBOOT_IMAGE_VERSION=\"<your.semantic.version>\"
+   $ (.venv) west build -p -b nrf9160dk_nrf9160_ns app -- -DCONFIG_MCUBOOT_IMAGE_VERSION=\"<your.semantic.version>\"
    $ (.venv) west flash
 
+External Libraries
+******************
+
+The following code libraries are installed by default. If you are not using the
+custom hardware to which they apply, you can safely remove these repositories
+from ``west.yml`` and remove the includes/function calls from the C code.
+
+* `golioth-zephyr-boards`_ includes the board definitions for the Golioth
+  Aludel-Mini
+* `libostentus`_ is a helper library for controlling the Ostentus ePaper
+  faceplate
+
 .. _Golioth Console: https://console.golioth.io
-.. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
 .. _Nordic nRF9160 DK: https://www.nordicsemi.com/Products/Development-hardware/nrf9160-dk
+.. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
+.. _libostentus: https://github.com/golioth/libostentus
 .. _MikroE Arduino UNO click shield: https://www.mikroe.com/arduino-uno-click-shield
+.. _MikroE Weather Click: https://www.mikroe.com/weather-click
+.. _MikroE HVAC Click: https://www.mikroe.com/hvac-click

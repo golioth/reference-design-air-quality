@@ -9,13 +9,13 @@
 
 #include <zephyr/data/json.h>
 
-struct air_quality_state {
+struct app_state {
 	int32_t example_int0;
 	int32_t example_int1;
 };
 
-static const struct json_obj_descr air_quality_state_descr[] = {
-	JSON_OBJ_DESCR_PRIM(struct air_quality_state, example_int0, JSON_TOK_NUMBER),
-	JSON_OBJ_DESCR_PRIM(struct air_quality_state, example_int1, JSON_TOK_NUMBER)};
+static const struct json_obj_descr app_state_descr[] = {
+	JSON_OBJ_DESCR_PRIM(struct app_state, example_int0, JSON_TOK_NUMBER),
+	JSON_OBJ_DESCR_PRIM(struct app_state, example_int1, JSON_TOK_NUMBER)};
 
 #endif

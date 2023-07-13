@@ -8,20 +8,21 @@
 LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 
 #include <net/golioth/settings.h>
-#include "app_settings.h"
 #include "main.h"
 #include "sensors.h"
 
+#include "app_settings.h"
+
 static struct golioth_client *client;
 
-static uint32_t _loop_delay_s = 60;
+static int32_t _loop_delay_s = 60;
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s;
 static bool _scd4x_asc_s = true;
 static uint32_t _sps30_samples_per_measurement_s = 30;
 static uint32_t _sps30_cleaning_interval_s = 604800;
 
-uint32_t get_loop_delay_s(void)
+int32_t get_loop_delay_s(void)
 {
 	return _loop_delay_s;
 }
@@ -81,6 +82,7 @@ K_WORK_DEFINE(sps30_sensor_set_fan_auto_cleaning_interval_work,
 
 enum golioth_settings_status on_setting(const char *key, const struct golioth_settings_value *value)
 {
+
 	LOG_DBG("Received setting: key = %s, type = %d", key, value->type);
 	if (strcmp(key, "LOOP_DELAY_S") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
@@ -91,18 +93,16 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 
 		/* Limit to 12 hour max delay: [1, 43200] */
 		if (value->i64 < 1 || value->i64 > 43200) {
-			LOG_DBG("Received LOOP_DELAY_S setting is outside"
-				" allowed range.");
+			LOG_DBG("Received LOOP_DELAY_S setting is outside allowed range.");
 			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
 		}
 
 		/* Only update if value has changed */
-		if (_loop_delay_s == (uint32_t)value->i64) {
-			LOG_DBG("Received LOOP_DELAY_S setting already matches"
-				" local value.");
+		if (_loop_delay_s == (int32_t)value->i64) {
+			LOG_DBG("Received LOOP_DELAY_S already matches local value.");
 		} else {
-			_loop_delay_s = (uint32_t)value->i64;
-			LOG_INF("Set main loop delay to %d seconds", _loop_delay_s);
+			_loop_delay_s = (int32_t)value->i64;
+			LOG_INF("Set loop delay to %d seconds", _loop_delay_s);
 
 			wake_system_thread();
 		}
@@ -236,27 +236,26 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 	return GOLIOTH_SETTINGS_KEY_NOT_RECOGNIZED;
 }
 
-void app_settings_init(struct golioth_client *state_client)
+int app_settings_init(struct golioth_client *state_client)
 {
 	client = state_client;
-	app_register_settings(client);
+	int err = app_settings_register(client);
+	return err;
 }
 
-void app_settings_observe(void)
+int app_settings_observe(void)
 {
-	int err;
-
-	err = golioth_settings_observe(client);
+	int err = golioth_settings_observe(client);
 	if (err) {
 		LOG_ERR("Failed to observe settings: %d", err);
 	}
+	return err;
 }
 
-int app_register_settings(struct golioth_client *settings_client)
+int app_settings_register(struct golioth_client *settings_client)
 {
-	int err;
+	int err = golioth_settings_register_callback(settings_client, on_setting);
 
-	err = golioth_settings_register_callback(settings_client, on_setting);
 	if (err) {
 		LOG_ERR("Failed to register settings callback: %d", err);
 	}

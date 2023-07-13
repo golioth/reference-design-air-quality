@@ -41,11 +41,11 @@ void app_state_init(struct golioth_client *state_client)
 	k_sem_give(&update_actual);
 }
 
-static void reset_desired_state(void)
+int app_state_reset_desired(void)
 {
 	LOG_INF("Resetting \"%s\" LightDB State endpoint to defaults.", APP_STATE_DESIRED_ENDP);
 
-	char sbuf[strlen(DEVICE_STATE_FMT) + 8]; /* small bit of extra space */
+	char sbuf[sizeof(DEVICE_STATE_FMT) + 4]; /* space for two "-1" values */
 
 	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, -1, -1);
 
@@ -57,12 +57,13 @@ static void reset_desired_state(void)
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
+	return err;
 }
 
-void app_state_update_actual(void)
+int app_state_update_actual(void)
 {
 
-	char sbuf[strlen(DEVICE_STATE_FMT) + 8]; /* small bit of extra space */
+	char sbuf[sizeof(DEVICE_STATE_FMT) + 10]; /* space for uint16 values */
 
 	snprintk(sbuf, sizeof(sbuf), DEVICE_STATE_FMT, _example_int0, _example_int1);
 
@@ -70,13 +71,18 @@ void app_state_update_actual(void)
 
 	err = golioth_lightdb_set_cb(client, APP_STATE_ACTUAL_ENDP, GOLIOTH_CONTENT_FORMAT_APP_JSON,
 				     sbuf, strlen(sbuf), async_handler, NULL);
+
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
+	return err;
 }
 
 int app_state_desired_handler(struct golioth_req_rsp *rsp)
 {
+	int err = 0;
+	int ret;
+
 	if (rsp->err) {
 		LOG_ERR("Failed to receive '%s' endpoint: %d", APP_STATE_DESIRED_ENDP, rsp->err);
 		return rsp->err;
@@ -84,15 +90,15 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 
 	LOG_HEXDUMP_DBG(rsp->data, rsp->len, APP_STATE_DESIRED_ENDP);
 
-	struct air_quality_state parsed_state;
+	struct app_state parsed_state;
 
-	int ret = json_obj_parse((char *)rsp->data, rsp->len, air_quality_state_descr,
-				 ARRAY_SIZE(air_quality_state_descr), &parsed_state);
+	ret = json_obj_parse((char *)rsp->data, rsp->len, app_state_descr,
+			     ARRAY_SIZE(app_state_descr), &parsed_state);
 
 	if (ret < 0) {
 		LOG_ERR("Error parsing desired values: %d", ret);
-		reset_desired_state();
-		return 0;
+		app_state_reset_desired();
+		return ret;
 	}
 
 	uint8_t desired_processed_count = 0;
@@ -100,12 +106,14 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 
 	if (ret & 1 << 0) {
 		/* Process example_int0 */
-		if ((parsed_state.example_int0 >= 0) && (parsed_state.example_int0 < 10000)) {
+		if ((parsed_state.example_int0 >= 0) && (parsed_state.example_int0 < 65536)) {
 			LOG_DBG("Validated desired example_int0 value: %d",
 				parsed_state.example_int0);
-			_example_int0 = parsed_state.example_int0;
+			if (_example_int0 != parsed_state.example_int0) {
+				_example_int0 = parsed_state.example_int0;
+				++state_change_count;
+			}
 			++desired_processed_count;
-			++state_change_count;
 		} else if (parsed_state.example_int0 == -1) {
 			LOG_DBG("No change requested for example_int0");
 		} else {
@@ -116,12 +124,14 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 	}
 	if (ret & 1 << 1) {
 		/* Process example_int1 */
-		if ((parsed_state.example_int1 >= 0) && (parsed_state.example_int1 < 10000)) {
+		if ((parsed_state.example_int1 >= 0) && (parsed_state.example_int1 < 65536)) {
 			LOG_DBG("Validated desired example_int1 value: %d",
 				parsed_state.example_int1);
-			_example_int1 = parsed_state.example_int1;
+			if (_example_int1 != parsed_state.example_int1) {
+				_example_int1 = parsed_state.example_int1;
+				++state_change_count;
+			}
 			++desired_processed_count;
-			++state_change_count;
 		} else if (parsed_state.example_int1 == -1) {
 			LOG_DBG("No change requested for example_int1");
 		} else {
@@ -133,18 +143,19 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 
 	if (state_change_count) {
 		/* The state was changed, so update the state on the Golioth servers */
-		app_state_update_actual();
+		err = app_state_update_actual();
 	}
 	if (desired_processed_count) {
 		/* We processed some desired changes to return these to -1 on the server
 		 * to indicate the desired values were received.
 		 */
-		reset_desired_state();
+		err = app_state_reset_desired();
 	}
-	return 0;
+
+	return err;
 }
 
-void app_state_observe(void)
+int app_state_observe(void)
 {
 	int err = golioth_lightdb_observe_cb(client, APP_STATE_DESIRED_ENDP,
 					     GOLIOTH_CONTENT_FORMAT_APP_JSON,
@@ -153,11 +164,13 @@ void app_state_observe(void)
 		LOG_WRN("failed to observe lightdb path: %d", err);
 	}
 
-	/* This will only run when we first connect. It updates the actual state of
-	 * the device with the Golioth servers. Future updates will be sent whenever
+	/* This will only run once. It updates the actual state of the device
+	 * with the Golioth servers. Future updates will be sent whenever
 	 * changes occur.
 	 */
 	if (k_sem_take(&update_actual, K_NO_WAIT) == 0) {
-		app_state_update_actual();
+		err = app_state_update_actual();
 	}
+
+	return err;
 }

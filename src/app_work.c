@@ -14,18 +14,19 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include "app_state.h"
 #include "app_settings.h"
 #include "app_work.h"
-#include "sensors.h"
 #include "libostentus/libostentus.h"
+#include "sensors.h"
 
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 #include "battery_monitor/battery.h"
 #endif
 
 static struct golioth_client *client;
+/* Add Sensor structs here */
 
 /* Formatting string for sending sensor JSON to Golioth */
 /* clang-format off */
-#define JSON_FMT "{\"tem\":%f,\"pre\":%f,\"hum\":%f,\"co2\":%u,\"mc_1p0\":%f,\"mc_2p5\":%f,\"mc_4p0\":%f,\"mc_10p0\":%f,\"nc_0p5\":%f,\"nc_1p0\":%f,\"nc_2p5\":%f,\"nc_4p0\":%f,\"nc_10p0\":%f,\"tps\":%f,\"batt_v\":%f,\"batt_lvl\":%f}"
+#define JSON_FMT "{\"tem\":%f,\"pre\":%f,\"hum\":%f,\"co2\":%u,\"mc_1p0\":%f,\"mc_2p5\":%f,\"mc_4p0\":%f,\"mc_10p0\":%f,\"nc_0p5\":%f,\"nc_1p0\":%f,\"nc_2p5\":%f,\"nc_4p0\":%f,\"nc_10p0\":%f,\"tps\":%f}"
 /* clang-format on */
 
 /* Callback for LightDB Stream */
@@ -43,21 +44,17 @@ static int async_error_handler(struct golioth_req_rsp *rsp)
 void app_work_sensor_read(void)
 {
 	int err;
-	struct sensor_value batt_v = {-1, 0};
-	struct sensor_value batt_lvl = {-1, 0};
+	char json_buf[512];
 	struct bme280_sensor_measurement bme280_sm;
 	struct scd4x_sensor_measurement scd4x_sm;
 	struct sps30_sensor_measurement sps30_sm;
-	char json_buf[512];
-	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (char batt_v_str[7]; char batt_lvl_str[5];));
 
 	LOG_DBG("Collecting battery measurements");
 
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
-		   (read_battery_info(&batt_v, &batt_lvl);
-
-		    LOG_INF("Battery measurement: voltage=%.2f V, level=%d%%",
-			    sensor_value_to_double(&batt_v), batt_lvl.val1);));
+		   (read_and_report_battery();
+		    slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
+		    slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));));
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -92,8 +89,8 @@ void app_work_sensor_read(void)
 		 sensor_value_to_double(&sps30_sm.nc_0p5), sensor_value_to_double(&sps30_sm.nc_1p0),
 		 sensor_value_to_double(&sps30_sm.nc_2p5), sensor_value_to_double(&sps30_sm.nc_4p0),
 		 sensor_value_to_double(&sps30_sm.nc_10p0),
-		 sensor_value_to_double(&sps30_sm.typical_particle_size),
-		 sensor_value_to_double(&batt_v), sensor_value_to_double(&batt_lvl));
+		 sensor_value_to_double(&sps30_sm.typical_particle_size));
+	LOG_DBG("%s", json_buf);
 
 	err = golioth_stream_push_cb(client, "sensor", GOLIOTH_CONTENT_FORMAT_APP_JSON, json_buf,
 				     strlen(json_buf), async_error_handler, NULL);
@@ -111,7 +108,7 @@ void app_work_sensor_read(void)
 	snprintk(json_buf, sizeof(json_buf), "%d kPa", bme280_sm.pressure.val1);
 	slide_set(PRESSURE, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%d %%RH", bme280_sm.humidity.val1);
+	snprintk(json_buf, sizeof(json_buf), "%d%% RH", bme280_sm.humidity.val1);
 	slide_set(HUMIDITY, json_buf, strlen(json_buf));
 
 	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
@@ -122,14 +119,6 @@ void app_work_sensor_read(void)
 
 	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
 	slide_set(PM10P0, json_buf, strlen(json_buf));
-
-	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
-		   (snprintk(batt_v_str, sizeof(batt_v_str), "%.2f V",
-			     sensor_value_to_double(&batt_v));
-		    slide_set(BATTERY_V, batt_v_str, strlen(batt_v_str));
-
-		    snprintk(batt_lvl_str, sizeof(batt_lvl_str), "%d%%", batt_lvl.val1);
-		    slide_set(BATTERY_LVL, batt_lvl_str, strlen(batt_lvl_str));));
 }
 
 void app_work_init(struct golioth_client *work_client)

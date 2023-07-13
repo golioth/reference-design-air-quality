@@ -59,7 +59,7 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 	sensor_channel_get(bme280_dev, SENSOR_CHAN_HUMIDITY, &measurement->humidity);
 
 	LOG_INF("bme280: Temperature=%f °C, Pressure=%f kPa,"
-		" Humidity=%f %%RH",
+		" Humidity=%f%% RH",
 		sensor_value_to_double(&measurement->temperature),
 		sensor_value_to_double(&measurement->pressure),
 		sensor_value_to_double(&measurement->humidity));
@@ -184,7 +184,7 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 	sensor_value_from_double(&measurement->humidity, humidity_percent_rh);
 
 	LOG_INF("scd4x: CO₂=%u ppm, Temperature=%f °C,"
-		" Humidity=%f %%RH",
+		" Humidity=%f%% RH",
 		co2_ppm, temperature_deg_c, humidity_percent_rh);
 
 	k_mutex_unlock(&scd4x_mutex);

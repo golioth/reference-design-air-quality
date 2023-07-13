@@ -6,6 +6,12 @@
 
 #include "nrf_dk_common.dtsi"
 
+/ {
+	aliases {
+		golioth-led = &led2;
+	};
+};
+
 &pinctrl {
 	/*
 	 * Arduino Uno provides the same SCL/SDA on two sets of pins, but the
