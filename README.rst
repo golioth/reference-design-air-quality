@@ -240,6 +240,37 @@ from ``west.yml`` and remove the includes/function calls from the C code.
 * `libostentus`_ is a helper library for controlling the Ostentus ePaper
   faceplate
 
+Pulling in updates from the Reference Design Template
+*****************************************************
+
+This reference design was forked from the `Reference Design Template`_ repo. We
+recommend the following workflow to pull in future changes:
+
+* Setup
+
+  * Create a ``template`` remote based on the Reference Design Template repository
+
+* Merge in template changes
+
+  * Fetch template changes and tags
+  * Merge template release tag into your ``main`` (or other branch)
+  * Resolve merge conflicts (if any) and commit to your repository
+
+.. code-block:: console
+
+   # Setup
+   git remote add template https://github.com/golioth/reference-design-template.git
+   git fetch template --tags
+
+   # Merge in template changes
+   git fetch template --tags
+   git checkout your_local_branch
+   git merge template_v1.0.0
+
+   # Resolve merge conflicts if necessry
+   git add resolved_files
+   git commit
+
 .. _Golioth Console: https://console.golioth.io
 .. _Nordic nRF9160 DK: https://www.nordicsemi.com/Products/Development-hardware/nrf9160-dk
 .. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
@@ -247,3 +278,4 @@ from ``west.yml`` and remove the includes/function calls from the C code.
 .. _MikroE Arduino UNO click shield: https://www.mikroe.com/arduino-uno-click-shield
 .. _MikroE Weather Click: https://www.mikroe.com/weather-click
 .. _MikroE HVAC Click: https://www.mikroe.com/hvac-click
+.. _Reference Design Template: https://github.com/golioth/reference-design-template
