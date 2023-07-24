@@ -272,7 +272,6 @@ void main(void)
 	while (true) {
 		app_work_sensor_read();
 
-		LOG_INF("Going to sleep for %d seconds", get_loop_delay_s());
 		k_sleep(K_SECONDS(get_loop_delay_s()));
 	}
 }
