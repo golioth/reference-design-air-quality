@@ -51,8 +51,8 @@ int bme280_sensor_read(struct bme280_sensor_measurement *measurement)
 
 	err = k_mutex_lock(&bme280_mutex, K_MSEC(BME280_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking BME280 mutex (lock count: %u): %d", err,
-			bme280_mutex.lock_count);
+		LOG_ERR("Error locking BME280 mutex (lock count: %u): %d", bme280_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -88,8 +88,8 @@ int scd4x_sensor_init(void)
 
 	err = k_mutex_lock(&scd4x_mutex, K_MSEC(SCD4X_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", err,
-			scd4x_mutex.lock_count);
+		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", scd4x_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -151,8 +151,8 @@ int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 
 	err = k_mutex_lock(&scd4x_mutex, K_MSEC(SCD4X_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", err,
-			scd4x_mutex.lock_count);
+		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", scd4x_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -212,8 +212,8 @@ int scd4x_sensor_set_temperature_offset(int32_t t_offset_m_deg_c)
 
 	err = k_mutex_lock(&scd4x_mutex, K_MSEC(SCD4X_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", err,
-			scd4x_mutex.lock_count);
+		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", scd4x_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -235,8 +235,8 @@ int scd4x_sensor_set_sensor_altitude(int16_t sensor_altitude)
 
 	err = k_mutex_lock(&scd4x_mutex, K_MSEC(SCD4X_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", err,
-			scd4x_mutex.lock_count);
+		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", scd4x_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -258,8 +258,8 @@ int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
 
 	err = k_mutex_lock(&scd4x_mutex, K_MSEC(SCD4X_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", err,
-			scd4x_mutex.lock_count);
+		LOG_ERR("Error locking SCD4x mutex (lock count: %u): %d", scd4x_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -292,8 +292,8 @@ int sps30_sensor_init(void)
 
 	err = k_mutex_lock(&sps30_mutex, K_MSEC(SPS30_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", err,
-			sps30_mutex.lock_count);
+		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", sps30_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -372,8 +372,8 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 	while (count < samples) {
 		err = k_mutex_lock(&sps30_mutex, K_MSEC(SPS30_MUTEX_TIMEOUT));
 		if (err) {
-			LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", err,
-				sps30_mutex.lock_count);
+			LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d",
+				sps30_mutex.lock_count, err);
 			return err;
 		}
 
@@ -459,8 +459,8 @@ int sps30_sensor_set_fan_auto_cleaning_interval(uint32_t interval_seconds)
 
 	err = k_mutex_lock(&sps30_mutex, K_MSEC(SPS30_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", err,
-			sps30_mutex.lock_count);
+		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", sps30_mutex.lock_count,
+			err);
 		return err;
 	}
 
@@ -485,8 +485,8 @@ int sps30_sensor_clean_fan(void)
 
 	err = k_mutex_lock(&sps30_mutex, K_MSEC(SPS30_MUTEX_TIMEOUT));
 	if (err) {
-		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", err,
-			sps30_mutex.lock_count);
+		LOG_ERR("Error locking SPS30 mutex (lock count: %u): %d", sps30_mutex.lock_count,
+			err);
 		return err;
 	}
 
