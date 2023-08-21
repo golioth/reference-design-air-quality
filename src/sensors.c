@@ -358,7 +358,6 @@ int sps30_sensor_init(void)
 int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 {
 	int16_t err;
-	int16_t data_ready_flag = 0;
 	struct sps30_measurement sps30_meas;
 	struct sps30_measurement sps30_meas_avg = {0};
 
@@ -379,7 +378,10 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 
 		/* Poll the sensor every 0.1s waiting for the data ready status */
 		/* Data should be ready every 1s */
-		while (!data_ready_flag) {
+		int16_t data_ready_flag = 0;
+		int tries = 100;
+
+		while (tries > 0) {
 			err = sps30_read_data_ready(&data_ready_flag);
 			if (err) {
 				LOG_ERR("Error reading SPS30 data ready status flag: %d", err);
@@ -387,7 +389,18 @@ int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 				return err;
 			}
 
+			if (data_ready_flag)
+				break;
+
+			/* Sleep 0.1s and try again */
 			sensirion_i2c_hal_sleep_usec(100000);
+			tries--;
+		}
+
+		if (tries == 0) {
+			LOG_ERR("SPS30 data ready flag was never asserted");
+			k_mutex_unlock(&sps30_mutex);
+			return -1;
 		}
 
 		err = sps30_read_measurement(&sps30_meas);
