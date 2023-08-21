@@ -14,8 +14,11 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include "app_state.h"
 #include "app_settings.h"
 #include "app_work.h"
-#include "libostentus/libostentus.h"
 #include "sensors.h"
+
+#ifdef CONFIG_LIB_OSTENTUS
+#include <libostentus.h>
+#endif
 
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 #include "battery_monitor/battery.h"
@@ -51,10 +54,11 @@ void app_work_sensor_read(void)
 
 	LOG_DBG("Collecting battery measurements");
 
-	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR,
-		   (read_and_report_battery();
-		    slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
-		    slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));));
+	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
+		read_and_report_battery();
+	 	slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
+		slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));
+	));
 
 	LOG_DBG("Collecting sensor measurements");
 
@@ -102,23 +106,25 @@ void app_work_sensor_read(void)
 	 *  -values should be sent as strings
 	 *  -use the enum from app_work.h for slide key values
 	 */
-	snprintk(json_buf, sizeof(json_buf), "%d C", bme280_sm.temperature.val1);
-	slide_set(TEMPERATURE, json_buf, strlen(json_buf));
+	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
+		snprintk(json_buf, sizeof(json_buf), "%d C", bme280_sm.temperature.val1);
+		slide_set(TEMPERATURE, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%d kPa", bme280_sm.pressure.val1);
-	slide_set(PRESSURE, json_buf, strlen(json_buf));
+		snprintk(json_buf, sizeof(json_buf), "%d kPa", bme280_sm.pressure.val1);
+		slide_set(PRESSURE, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%d%% RH", bme280_sm.humidity.val1);
-	slide_set(HUMIDITY, json_buf, strlen(json_buf));
+		snprintk(json_buf, sizeof(json_buf), "%d%% RH", bme280_sm.humidity.val1);
+		slide_set(HUMIDITY, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
-	slide_set(CO2, json_buf, strlen(json_buf));
+		snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
+		slide_set(CO2, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
-	slide_set(PM2P5, json_buf, strlen(json_buf));
+		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
+		slide_set(PM2P5, json_buf, strlen(json_buf));
 
-	snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
-	slide_set(PM10P0, json_buf, strlen(json_buf));
+		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
+		slide_set(PM10P0, json_buf, strlen(json_buf));
+	));
 }
 
 void app_work_init(struct golioth_client *work_client)
