@@ -29,4 +29,3 @@ target_sources(app PRIVATE external/sensirion/embedded-i2c-scd4x/scd4x_i2c.c)
 target_sources(app PRIVATE external/sensirion/embedded-sps/sps30-i2c/sps30.c)
 
 add_subdirectory_ifdef(CONFIG_ALUDEL_BATTERY_MONITOR src/battery_monitor)
-add_subdirectory(src/network_info)
