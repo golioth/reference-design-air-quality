@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "zcbor_common.h"
 #include <zephyr/logging/log.h>
 #include <zephyr/logging/log_ctrl.h>
 LOG_MODULE_REGISTER(app_rpc, LOG_LEVEL_DBG);
@@ -13,11 +12,11 @@ LOG_MODULE_REGISTER(app_rpc, LOG_LEVEL_DBG);
 #include <net/golioth/rpc.h>
 #include <zephyr/logging/log_ctrl.h>
 #include <zephyr/sys/reboot.h>
-
 #include <network_info.h>
-#include "sensors.h"
+#include <zcbor_common.h>
 
 #include "app_rpc.h"
+#include "sensors.h"
 
 static struct golioth_client *client;
 
@@ -74,7 +73,7 @@ static enum golioth_rpc_status on_set_log_level(zcbor_state_t *request_params_ar
 		return GOLIOTH_RPC_INVALID_ARGUMENT;
 	}
 
-	log_level = (uint32_t)param_0;
+	log_level = (uint8_t)param_0;
 
 	if ((log_level < 0) || (log_level > LOG_LEVEL_DBG)) {
 
@@ -99,13 +98,11 @@ static enum golioth_rpc_status on_set_log_level(zcbor_state_t *request_params_ar
 	ok = zcbor_tstr_put_lit(response_detail_map, "log_modules") &&
 	     zcbor_float64_put(response_detail_map, (double)source_id);
 
-
 	return GOLIOTH_RPC_OK;
 }
 
 static enum golioth_rpc_status on_reboot(zcbor_state_t *request_params_array,
-					 zcbor_state_t *response_detail_map,
-					 void *callback_arg)
+					 zcbor_state_t *response_detail_map, void *callback_arg)
 {
 	/* Use work queue so this RPC can return confirmation to Golioth */
 	k_work_submit(&reboot_work);

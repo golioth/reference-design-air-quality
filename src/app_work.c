@@ -11,8 +11,6 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
 
-#include "app_state.h"
-#include "app_settings.h"
 #include "app_work.h"
 #include "sensors.h"
 
@@ -56,7 +54,7 @@ void app_work_sensor_read(void)
 
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
 		read_and_report_battery();
-	 	slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
+		slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
 		slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));
 	));
 
@@ -102,11 +100,11 @@ void app_work_sensor_read(void)
 		LOG_ERR("Failed to send sensor data to Golioth: %d", err);
 	}
 
-	/* Update slide values on Ostentus
-	 *  -values should be sent as strings
-	 *  -use the enum from app_work.h for slide key values
-	 */
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
+		/* Update slide values on Ostentus
+		 *  -values should be sent as strings
+		 *  -use the enum from app_work.h for slide key values
+		 */
 		snprintk(json_buf, sizeof(json_buf), "%d C", bme280_sm.temperature.val1);
 		slide_set(TEMPERATURE, json_buf, strlen(json_buf));
 
