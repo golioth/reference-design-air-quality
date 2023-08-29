@@ -1,13 +1,8 @@
 /*
- * Copyright (c) 2022 Golioth, Inc.
+ * Copyright (c) 2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
-#ifndef __APP_WORK_H__
-#define __APP_WORK_H__
-
-#include <net/golioth/system_client.h>
 
 /** The `app_work.c` file performs the important work of this application which
  * is to read sensor values and report them to the Golioth LightDB Stream as
@@ -16,8 +11,10 @@
  * https://docs.golioth.io/firmware/zephyr-device-sdk/light-db-stream/
  */
 
-void app_work_init(struct golioth_client *work_client);
-void app_work_sensor_read(void);
+#ifndef __APP_WORK_H__
+#define __APP_WORK_H__
+
+#include <net/golioth/system_client.h>
 
 #define LABEL_TEMPERATURE "Temperature"
 #define LABEL_PRESSURE	  "Pressure"
@@ -46,5 +43,8 @@ typedef enum {
 #endif
 	FIRMWARE
 } slide_key;
+
+void app_work_init(struct golioth_client *work_client);
+void app_work_sensor_read(void);
 
 #endif /* __APP_WORK_H__ */

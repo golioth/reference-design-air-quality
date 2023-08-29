@@ -32,10 +32,10 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #include <modem/modem_info.h>
 #endif
 
-static struct golioth_client *client = GOLIOTH_SYSTEM_CLIENT_GET();
-
 K_SEM_DEFINE(connected, 0, 1);
 K_SEM_DEFINE(dfu_status_unreported, 1, 1);
+
+static struct golioth_client *client = GOLIOTH_SYSTEM_CLIENT_GET();
 
 static k_tid_t _system_thread = 0;
 
@@ -43,7 +43,7 @@ static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(DT_ALIAS(golioth
 static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
 static struct gpio_callback button_cb_data;
 
-/* forward declarations */
+/* Forward declarations */
 void golioth_connection_led_set(uint8_t state);
 
 void wake_system_thread(void)
@@ -271,18 +271,19 @@ int main(void)
 		slide_add(TEMPERATURE, LABEL_TEMPERATURE, strlen(LABEL_TEMPERATURE));
 		slide_add(PRESSURE, LABEL_PRESSURE, strlen(LABEL_PRESSURE));
 		slide_add(HUMIDITY, LABEL_HUMIDITY, strlen(LABEL_HUMIDITY));
+
 		IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
 			slide_add(BATTERY_V, LABEL_BATTERY, strlen(LABEL_BATTERY));
 			slide_add(BATTERY_LVL, LABEL_BATTERY, strlen(LABEL_BATTERY));
 		));
+
 		slide_add(FIRMWARE, LABEL_FIRMWARE, strlen(LABEL_FIRMWARE));
 
 		/* Set the title of the Ostentus summary slide (optional) */
 		summary_title(SUMMARY_TITLE, strlen(SUMMARY_TITLE));
 
 		/* Update the Firmware slide with the firmware version */
-		slide_set(FIRMWARE, CONFIG_MCUBOOT_IMAGE_VERSION,
-			  strlen(CONFIG_MCUBOOT_IMAGE_VERSION));
+		slide_set(FIRMWARE, CONFIG_MCUBOOT_IMAGE_VERSION, strlen(CONFIG_MCUBOOT_IMAGE_VERSION));
 
 		/* Start Ostentus slideshow with 30 second delay between slides */
 		slideshow(30000);
