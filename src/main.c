@@ -177,7 +177,7 @@ int main(void)
 {
 	int err;
 
-	LOG_INF("Started air quality monitor app");
+	LOG_DBG("Started air quality monitor app");
 
 	LOG_INF("Firmware version: %s", CONFIG_MCUBOOT_IMAGE_VERSION);
 	IF_ENABLED(CONFIG_MODEM_INFO, (log_modem_firmware_version();));

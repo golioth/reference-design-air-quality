@@ -180,7 +180,7 @@ static bool battery_ok;
 
 static int battery_setup(void)
 {
-	LOG_INF("Initializing battery measurement");
+	LOG_DBG("Initializing battery measurement");
 
 	int rc = divider_setup();
 
@@ -307,7 +307,7 @@ char *get_batt_lvl_str(void)
 
 void log_battery_data(void)
 {
-	LOG_INF("Battery measurement: voltage=%s, level=%s", get_batt_v_str(), get_batt_lvl_str());
+	LOG_DBG("Battery measurement: voltage=%s, level=%s", get_batt_v_str(), get_batt_lvl_str());
 }
 
 int stream_battery_data(struct battery_data *batt_data)

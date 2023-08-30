@@ -122,7 +122,7 @@ int scd4x_sensor_init(void)
 		return err;
 	}
 
-	LOG_INF("SCD4x serial number: 0x%04x%04x%04x", serial_0, serial_1, serial_2);
+	LOG_DBG("SCD4x serial number: 0x%04x%04x%04x", serial_0, serial_1, serial_2);
 
 	/* According to the datasheet, the first reading obtained after waking
 	 * up the sensor must be discarded, so do a throw-away measurement now
