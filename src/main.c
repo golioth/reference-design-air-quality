@@ -11,11 +11,14 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #include <net/golioth/system_client.h>
 #include <samples/common/net_connect.h>
 #include <zephyr/net/coap.h>
+#include <zephyr/drivers/gpio.h>
+
 #include "app_rpc.h"
 #include "app_settings.h"
 #include "app_state.h"
 #include "app_work.h"
 #include "dfu/app_dfu.h"
+#include "sensors.h"
 
 #ifdef CONFIG_LIB_OSTENTUS
 #include <libostentus.h>
@@ -24,18 +27,15 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 #include "battery_monitor/battery.h"
 #endif
-#include "sensors.h"
-
-#include <zephyr/drivers/gpio.h>
 
 #ifdef CONFIG_MODEM_INFO
 #include <modem/modem_info.h>
 #endif
 
-static struct golioth_client *client = GOLIOTH_SYSTEM_CLIENT_GET();
-
 K_SEM_DEFINE(connected, 0, 1);
 K_SEM_DEFINE(dfu_status_unreported, 1, 1);
+
+static struct golioth_client *client = GOLIOTH_SYSTEM_CLIENT_GET();
 
 static k_tid_t _system_thread = 0;
 
@@ -43,7 +43,7 @@ static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(DT_ALIAS(golioth
 static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
 static struct gpio_callback button_cb_data;
 
-/* forward declarations */
+/* Forward declarations */
 void golioth_connection_led_set(uint8_t state);
 
 void wake_system_thread(void)
@@ -219,8 +219,10 @@ int main(void)
 	/* Start LTE asynchronously if the nRF9160 is used
 	 * Golioth Client will start automatically when LTE connects
 	 */
-	IF_ENABLED(CONFIG_SOC_NRF9160, (LOG_INF("Connecting to LTE, this may take some time...");
-					lte_lc_init_and_connect_async(lte_handler);));
+	IF_ENABLED(CONFIG_SOC_NRF9160, (
+		LOG_INF("Connecting to LTE, this may take some time...");
+		lte_lc_init_and_connect_async(lte_handler);
+	));
 
 	/* If nRF9160 is not used, start the Golioth Client and block until connected */
 	if (!IS_ENABLED(CONFIG_SOC_NRF9160)) {
@@ -228,6 +230,7 @@ int main(void)
 		if (IS_ENABLED(CONFIG_GOLIOTH_SAMPLES_COMMON)) {
 			net_connect();
 		}
+
 		/* Start Golioth client */
 		golioth_system_client_start();
 
@@ -256,12 +259,12 @@ int main(void)
 	gpio_init_callback(&button_cb_data, button_pressed, BIT(user_btn.pin));
 	gpio_add_callback(user_btn.port, &button_cb_data);
 
-	/* Set up a slideshow on Ostentus
-	 *  - add up to 256 slides
-	 *  - use the enum in app_work.h to add new keys
-	 *  - values are updated using these keys (see app_work.c)
-	 */
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
+		/* Set up a slideshow on Ostentus
+		 *  - add up to 256 slides
+		 *  - use the enum in app_work.h to add new keys
+		 *  - values are updated using these keys (see app_work.c)
+		 */
 		slide_add(CO2, LABEL_CO2, strlen(LABEL_CO2));
 		slide_add(PM2P5, LABEL_PM2P5, strlen(LABEL_PM2P5));
 		slide_add(PM10P0, LABEL_PM10P0, strlen(LABEL_PM10P0));
@@ -272,10 +275,11 @@ int main(void)
 		IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
 			slide_add(BATTERY_V, LABEL_BATTERY, strlen(LABEL_BATTERY));
 			slide_add(BATTERY_LVL, LABEL_BATTERY, strlen(LABEL_BATTERY));
-			slide_add(FIRMWARE, LABEL_FIRMWARE, strlen(LABEL_FIRMWARE));
-			));
+		));
 
-		/* Set the title ofthe Ostentus summary slide (optional) */
+		slide_add(FIRMWARE, LABEL_FIRMWARE, strlen(LABEL_FIRMWARE));
+
+		/* Set the title of the Ostentus summary slide (optional) */
 		summary_title(SUMMARY_TITLE, strlen(SUMMARY_TITLE));
 
 		/* Update the Firmware slide with the firmware version */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Golioth, Inc.
+ * Copyright (c) 2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,9 +8,9 @@
 LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 
 #include <net/golioth/settings.h>
+
 #include "main.h"
 #include "sensors.h"
-
 #include "app_settings.h"
 
 static struct golioth_client *client;
@@ -118,15 +118,13 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 
 		/* Limit to m°C in the range [INT32_MIN, INT32_MAX] */
 		if (value->i64 < INT32_MIN || value->i64 > INT32_MAX) {
-			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting"
-				" is outside allowed range.");
+			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting is outside allowed range.");
 			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
 		}
 
 		/* Only update if value has changed */
 		if (_scd4x_temperature_offset_s == (int32_t)value->i64) {
-			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting"
-				" already matches local value.");
+			LOG_DBG("Received CO2_SENSOR_TEMPERATURE_OFFSET setting already matches local value.");
 		} else {
 			_scd4x_temperature_offset_s = (int32_t)value->i64;
 			/* Submit a work item to write this to the sensor */
@@ -144,15 +142,13 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 
 		/* Limit to meters in the range [INT16_MIN, INT16_MAX] */
 		if (value->i64 < INT16_MIN || value->i64 > INT16_MAX) {
-			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting is"
-				" outside allowed range.");
+			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting is outside allowed range.");
 			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
 		}
 
 		/* Only update if value has changed */
 		if (_scd4x_altitude_s == (uint16_t)value->i64) {
-			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting already"
-				" matches local value.");
+			LOG_DBG("Received CO2_SENSOR_ALTITUDE setting already matches local value.");
 		} else {
 			_scd4x_altitude_s = (uint16_t)value->i64;
 			/* Submit a work item to write this to the sensor */
@@ -170,8 +166,7 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 
 		/* Only update if value has changed */
 		if (_scd4x_asc_s == (bool)value->b) {
-			LOG_DBG("Received CO2_SENSOR_ASC_ENABLE setting already"
-				" matches local value.");
+			LOG_DBG("Received CO2_SENSOR_ASC_ENABLE setting already matches local value.");
 		} else {
 			_scd4x_asc_s = (bool)value->b;
 			/* Submit a work item to write this to the sensor */
@@ -183,24 +178,22 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 	if (strcmp(key, "PM_SENSOR_SAMPLES_PER_MEASUREMENT") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
-			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT is not an integer"
-				" type.");
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT is not an integer type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
 		/* Limit to seconds in the range [UINT32_MIN, UINT32_MAX] */
 		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
-			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT"
-				" setting is outside allowed range.");
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT setting is outside allowed range.");
 			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
 		}
 
 		/* Only update if value has changed */
 		if (_sps30_samples_per_measurement_s == (uint32_t)value->i64) {
-			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT"
-				" setting already matches local value.");
+			LOG_DBG("Received PM_SENSOR_SAMPLES_PER_MEASUREMENT setting already matches local value.");
 		} else {
 			_sps30_samples_per_measurement_s = (uint32_t)value->i64;
+			LOG_DBG("Set PM_SENSOR_SAMPLES_PER_MEASUREMENT settting to %d", _sps30_samples_per_measurement_s);
 		}
 		return GOLIOTH_SETTINGS_SUCCESS;
 	}
@@ -208,22 +201,19 @@ enum golioth_settings_status on_setting(const char *key, const struct golioth_se
 	if (strcmp(key, "PM_SENSOR_AUTO_CLEANING_INTERVAL") == 0) {
 		/* This setting is expected to be numeric, return an error if it's not */
 		if (value->type != GOLIOTH_SETTINGS_VALUE_TYPE_INT64) {
-			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL is not an integer"
-				" type.");
+			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL is not an integer type.");
 			return GOLIOTH_SETTINGS_VALUE_FORMAT_NOT_VALID;
 		}
 
 		/* Limit to seconds in the range [UINT32_MIN, UINT32_MAX] */
 		if (value->i64 < 0 || value->i64 > UINT32_MAX) {
-			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL"
-				" setting is outside allowed range.");
+			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL setting is outside allowed range.");
 			return GOLIOTH_SETTINGS_VALUE_OUTSIDE_RANGE;
 		}
 
 		/* Only update if value has changed */
 		if (_sps30_cleaning_interval_s == (uint32_t)value->i64) {
-			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL"
-				" setting already matches local value.");
+			LOG_DBG("Received PM_SENSOR_AUTO_CLEANING_INTERVAL setting already matches local value.");
 		} else {
 			_sps30_cleaning_interval_s = (uint32_t)value->i64;
 			/* Submit a work item to write this to the sensor */
@@ -240,6 +230,7 @@ int app_settings_init(struct golioth_client *state_client)
 {
 	client = state_client;
 	int err = app_settings_register(client);
+
 	return err;
 }
 
@@ -249,6 +240,7 @@ int app_settings_observe(void)
 	if (err) {
 		LOG_ERR("Failed to observe settings: %d", err);
 	}
+
 	return err;
 }
 

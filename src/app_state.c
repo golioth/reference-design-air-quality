@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Golioth, Inc.
+ * Copyright (c) 2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,15 +9,15 @@ LOG_MODULE_REGISTER(app_state, LOG_LEVEL_DBG);
 
 #include <net/golioth/system_client.h>
 #include <zephyr/data/json.h>
-#include "json_helper.h"
 
+#include "json_helper.h"
 #include "app_state.h"
 #include "app_work.h"
 
 #define DEVICE_STATE_FMT "{\"example_int0\":%d,\"example_int1\":%d}"
 
-uint32_t _example_int0;
-uint32_t _example_int1 = 1;
+static uint32_t _example_int0;
+static uint32_t _example_int1 = 1;
 
 static struct golioth_client *client;
 
@@ -57,6 +57,7 @@ int app_state_reset_desired(void)
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
+
 	return err;
 }
 
@@ -75,6 +76,7 @@ int app_state_update_actual(void)
 	if (err) {
 		LOG_ERR("Unable to write to LightDB State: %d", err);
 	}
+
 	return err;
 }
 
@@ -107,8 +109,7 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 	if (ret & 1 << 0) {
 		/* Process example_int0 */
 		if ((parsed_state.example_int0 >= 0) && (parsed_state.example_int0 < 65536)) {
-			LOG_DBG("Validated desired example_int0 value: %d",
-				parsed_state.example_int0);
+			LOG_DBG("Validated desired example_int0 value: %d", parsed_state.example_int0);
 			if (_example_int0 != parsed_state.example_int0) {
 				_example_int0 = parsed_state.example_int0;
 				++state_change_count;
@@ -117,16 +118,14 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 		} else if (parsed_state.example_int0 == -1) {
 			LOG_DBG("No change requested for example_int0");
 		} else {
-			LOG_ERR("Invalid desired example_int0 value: %d",
-				parsed_state.example_int0);
+			LOG_ERR("Invalid desired example_int0 value: %d", parsed_state.example_int0);
 			++desired_processed_count;
 		}
 	}
 	if (ret & 1 << 1) {
 		/* Process example_int1 */
 		if ((parsed_state.example_int1 >= 0) && (parsed_state.example_int1 < 65536)) {
-			LOG_DBG("Validated desired example_int1 value: %d",
-				parsed_state.example_int1);
+			LOG_DBG("Validated desired example_int1 value: %d", parsed_state.example_int1);
 			if (_example_int1 != parsed_state.example_int1) {
 				_example_int1 = parsed_state.example_int1;
 				++state_change_count;
@@ -135,8 +134,7 @@ int app_state_desired_handler(struct golioth_req_rsp *rsp)
 		} else if (parsed_state.example_int1 == -1) {
 			LOG_DBG("No change requested for example_int1");
 		} else {
-			LOG_ERR("Invalid desired example_int1 value: %d",
-				parsed_state.example_int1);
+			LOG_ERR("Invalid desired example_int1 value: %d", parsed_state.example_int1);
 			++desired_processed_count;
 		}
 	}

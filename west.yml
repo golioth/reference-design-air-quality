@@ -43,6 +43,7 @@ manifest:
       path: deps/modules/lib/network-info
       revision: v1.0.1
       url: https://github.com/golioth/zephyr-network-info
+
     - name: sensirion-embedded-common
       path: app/external/sensirion/embedded-common
       revision: f0a64d166266b364c558d407739c96fdc5395df1
