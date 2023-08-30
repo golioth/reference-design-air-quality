@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Limit retries on SPS30 data ready flag
 - Increase SPS30 mutex timeout
 - Fix sensor mutex error messages
+- Clear Ostentus memory when app starts
 
 ### Changed
 
