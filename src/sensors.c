@@ -136,7 +136,7 @@ int scd4x_sensor_init(void)
 
 int scd4x_sensor_read(struct scd4x_sensor_measurement *measurement)
 {
-	int16_t err;
+	int err;
 	bool data_ready_flag = false;
 	uint16_t co2_ppm;
 	int32_t temperature_m_deg_c, humidity_m_percent_rh;
@@ -273,7 +273,7 @@ int scd4x_sensor_set_automatic_self_calibration(bool asc_enabled)
 
 int sps30_sensor_init(void)
 {
-	int16_t err;
+	int err;
 	uint8_t fw_major;
 	uint8_t fw_minor;
 	char serial_number[SPS30_MAX_SERIAL_LEN];
@@ -348,7 +348,7 @@ int sps30_sensor_init(void)
 
 int sps30_sensor_read(struct sps30_sensor_measurement *measurement)
 {
-	int16_t err;
+	int err;
 	struct sps30_measurement sps30_meas;
 	struct sps30_measurement sps30_meas_avg = {0};
 
