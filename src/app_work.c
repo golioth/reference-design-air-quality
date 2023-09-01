@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Golioth, Inc.
+ * Copyright (c) 2022-2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -17,7 +17,6 @@ LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
 #ifdef CONFIG_LIB_OSTENTUS
 #include <libostentus.h>
 #endif
-
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 #include "battery_monitor/battery.h"
 #endif
