@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Golioth, Inc.
+ * Copyright (c) 2022-2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,8 +10,8 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include <net/golioth/settings.h>
 
 #include "main.h"
-#include "sensors.h"
 #include "app_settings.h"
+#include "sensors.h"
 
 static struct golioth_client *client;
 

@@ -10,16 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - ADD DATE HERE
+
 ### Fixed
 
 - Limit retries on SPS30 data ready flag
 - Increase SPS30 mutex timeout
 - Fix sensor mutex error messages
-- Clear Ostentus memory when app starts
 
 ### Changed
 
-- Merge changes from [`golioth/reference-design-template@template_v1.1.0`](https://github.com/golioth/reference-design-template/tree/template_v1.1.0)
+- Merge changes from [`golioth/reference-design-template@f1d2422`](https://github.com/golioth/reference-design-template/commit/f1d2422ba04e13ebf66b36529abdbb781896e479)
 - Change sensor readings logging level from `LOG_INF` to `LOG_DBG`
 
 ### Removed

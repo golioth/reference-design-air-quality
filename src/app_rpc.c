@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Golioth, Inc.
+ * Copyright (c) 2022-2023 Golioth, Inc.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -95,6 +95,7 @@ static enum golioth_rpc_status on_set_log_level(zcbor_state_t *request_params_ar
 	}
 
 	LOG_WRN("Log levels for %d modules set to: %d", source_id, log_level);
+
 	ok = zcbor_tstr_put_lit(response_detail_map, "log_modules") &&
 	     zcbor_float64_put(response_detail_map, (double)source_id);
 
@@ -102,7 +103,8 @@ static enum golioth_rpc_status on_set_log_level(zcbor_state_t *request_params_ar
 }
 
 static enum golioth_rpc_status on_reboot(zcbor_state_t *request_params_array,
-					 zcbor_state_t *response_detail_map, void *callback_arg)
+					 zcbor_state_t *response_detail_map,
+					 void *callback_arg)
 {
 	/* Use work queue so this RPC can return confirmation to Golioth */
 	k_work_submit(&reboot_work);
