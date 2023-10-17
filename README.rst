@@ -370,7 +370,7 @@ recommend the following workflow to pull in future changes:
 .. _MikroE HVAC Click: https://www.mikroe.com/hvac-click
 .. _Reference Design Template: https://github.com/golioth/reference-design-template
 .. _Air Quality Monitor Project Page: https://projects.golioth.io/reference-designs/air-quality-monitor
-.. _nRF9160 DK Follow-Along Guide: https://example.com
+.. _nRF9160 DK Follow-Along Guide: https://projects.golioth.io/reference-designs/air-quality-monitor/guide-nrf9160-dk
 .. _releases: https://github.com/golioth/reference-design-air-quality/releases
 .. _Zephyr Getting Started Guide: https://docs.zephyrproject.org/latest/develop/getting_started/
 .. _Developer Training: https://training.golioth.io
