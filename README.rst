@@ -46,7 +46,7 @@ This firmware can be built for a variety of supported hardware platforms.
      - Zephyr Board
      - Follow-Along Guide
 
-   * - .. image:: https://projects.golioth.io/assets/images/air_quality_monitor_fah_nrf9160_dk-c6f4f7b353395abdb6250c8ea9c60fcc.png
+   * - .. image:: images/air_quality_monitor_fah_nrf9160_dk.png
           :width: 240
      - ``nrf9160dk_nrf9160_ns``
      - `nRF9160 DK Follow-Along Guide`_
@@ -57,7 +57,7 @@ This firmware can be built for a variety of supported hardware platforms.
    * - Hardware
      - Zephyr Board
      - Project Page
-   * - .. image:: https://projects.golioth.io/assets/images/air_quality_monitor_photo_top-fdcc5e4e46d7b496d43074461411e32a.jpg
+   * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
           :width: 240
      - ``aludel_mini_v1_sparkfun9160_ns``
      - `Air Quality Monitor Project Page`_
