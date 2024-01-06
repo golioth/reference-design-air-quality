@@ -39,7 +39,9 @@ static struct golioth_client *client = GOLIOTH_SYSTEM_CLIENT_GET();
 
 static k_tid_t _system_thread = 0;
 
+#if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(DT_ALIAS(golioth_led), gpios);
+#endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
 static struct gpio_callback button_cb_data;
 
@@ -165,7 +167,9 @@ void golioth_connection_led_set(uint8_t state)
 {
 	uint8_t pin_state = state ? 1 : 0;
 	/* Turn on Golioth logo LED once connected */
+#if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 	gpio_pin_set_dt(&golioth_led, pin_state);
+#endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 	/* Change the state of the Golioth LED on Ostentus */
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (led_golioth_set(pin_state);));
 }
@@ -191,11 +195,13 @@ int main(void)
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
 
+#if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 	/* Initialize Golioth logo LED */
 	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
 	if (err) {
 		LOG_ERR("Unable to configure LED for Golioth Logo");
 	}
+#endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 
 	/* Initialize app state */
 	app_state_init(client);
@@ -236,8 +242,10 @@ int main(void)
 		/* Block until connected to Golioth */
 		k_sem_take(&connected, K_FOREVER);
 
+#if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 		/* Turn on Golioth logo LED once connected */
 		gpio_pin_set_dt(&golioth_led, 1);
+#endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 	}
 
 	/* Set up user button */
