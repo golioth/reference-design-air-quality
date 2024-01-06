@@ -3,6 +3,10 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+if((BOARD STREQUAL nrf9160dk_nrf9160) OR (BOARD STREQUAL nrf9160dk_nrf9160_ns))
+  set(SHIELD "arduino_uno_click")
+endif()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(air_quality)

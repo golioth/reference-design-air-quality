@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for the Aludel Elixir v1 board (`aludel_elixir_v1`).
+
 ### Changed
 
 - Merge changes from [`golioth/reference-design-template@3d2647a`](https://github.com/golioth/reference-design-template/tree/3d2647a4fceb004083c88e9749f3bc0edf2a1254).

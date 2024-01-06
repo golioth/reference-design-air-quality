@@ -33,7 +33,7 @@ manifest:
 
     - name: golioth-zephyr-boards
       path: deps/modules/lib/golioth-boards
-      revision: v1.0.1
+      revision: 045a9c391fcc25dd6d16883ed9b87b4e14489e61
       url: https://github.com/golioth/golioth-zephyr-boards
 
     - name: libostentus
@@ -48,7 +48,7 @@ manifest:
 
     - name: sensirion-embedded-common
       path: app/external/sensirion/embedded-common
-      revision: f0a64d166266b364c558d407739c96fdc5395df1
+      revision: 08c9924e33b69b650fa36eed6cbdd29479d25ab6
       url: https://github.com/golioth/sensirion-embedded-common.git
 
     - name: sensirion-embedded-i2c-scd4x
