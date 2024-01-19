@@ -10,32 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-* Merge changes from [`golioth/reference-design-template@template_v1.2.0`](https://github.com/golioth/reference-design-template/tree/template_v1.2.0)
+### Changed
+
+- Merge changes from [`golioth/reference-design-template@template_v1.2.0`](https://github.com/golioth/reference-design-template/tree/template_v1.2.0).
 
 ## [1.2.0] - 2023-09-05
 
 ### Fixed
 
-- Limit retries on SPS30 data ready flag
-- Increase SPS30 mutex timeout
-- Fix sensor mutex error messages
+- Limit retries on SPS30 data ready flag.
+- Increase SPS30 mutex timeout.
+- Fix sensor mutex error messages.
 
 ### Changed
 
-- Merge changes from [`golioth/reference-design-template@f1d2422`](https://github.com/golioth/reference-design-template/commit/f1d2422ba04e13ebf66b36529abdbb781896e479)
-- Change sensor readings logging level from `LOG_INF` to `LOG_DBG`
+- Merge changes from [`golioth/reference-design-template@f1d2422`](https://github.com/golioth/reference-design-template/commit/f1d2422ba04e13ebf66b36529abdbb781896e479).
+- Change sensor readings logging level from `LOG_INF` to `LOG_DBG`.
 
 ### Removed
 
-- Remove `clang-format` from pre-commit hooks
-- Remove logging of JSON data sent to Golioth
+- Remove `clang-format` from pre-commit hooks.
+- Remove logging of JSON data sent to Golioth.
 
 ## [1.1.4] - 2023-07-31
 
 ### Changed
 
-- Remove potentially confusing log message from the main loop
-- Merge changes from [`golioth/reference-design-template@e5cdc7d`](https://github.com/golioth/reference-design-template/commit/e5cdc7d5da4d1440135a63017159d2e691ec7713)
+- Remove potentially confusing log message from the main loop.
+- Merge changes from [`golioth/reference-design-template@e5cdc7d`](https://github.com/golioth/reference-design-template/commit/e5cdc7d5da4d1440135a63017159d2e691ec7713).
 - Upgrade dependencies:
   - [`golioth/golioth-zephyr-sdk@f01824d`](https://github.com/golioth/golioth-zephyr-sdk/commit/f01824d8f0943463ee07cb493103a63221599c79)
   - [`golioth/golioth-zephyr-boards@0a0a27d`](https://github.com/golioth/golioth-zephyr-boards/commit/0a0a27dc2facc4245be0d15b9b36ce526cbf9262)
@@ -44,5 +46,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a CHANGELOG.md to track changes moving forward.
-- Merged changes from `template_v1.0.1`
+- Add a CHANGELOG.md to track changes moving forward.
+- Merge changes from [`golioth/reference-design-template@template_v1.0.1`](https://github.com/golioth/reference-design-template/tree/template_v1.0.1).
