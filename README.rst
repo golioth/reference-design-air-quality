@@ -46,7 +46,7 @@ This firmware can be built for a variety of supported hardware platforms.
      - Zephyr Board
      - Follow-Along Guide
 
-   * - .. image:: images/air_quality_monitor_fah_nrf9160_dk.png
+   * - .. image:: images/air_quality_monitor_fah_nrf9160_dk.jpg
           :width: 240
      - ``nrf9160dk_nrf9160_ns``
      - `nRF9160 DK Follow-Along Guide`_
