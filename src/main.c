@@ -87,8 +87,8 @@ static void start_golioth_client(void)
 	/* Observe State service data */
 	app_state_observe(client);
 
-	/* Initialize app work */
-	app_sensors_init(client);
+	/* Set Golioth Client for streaming sensor data */
+	app_sensors_set_client(client);
 
 	/* Register Settings service */
 	app_settings_register(client);
@@ -195,7 +195,7 @@ int main(void)
 	/* If nRF9160 is not used, start the Golioth Client and block until connected */
 
 	/* Run WiFi/DHCP if necessary */
-	if (IS_ENABLED(CONFIG_GOLIOTH_SAMPLES_COMMON)) {
+	if (IS_ENABLED(CONFIG_GOLIOTH_SAMPLE_COMMON)) {
 		net_connect();
 	}
 
@@ -274,7 +274,7 @@ int main(void)
 	}
 
 	while (true) {
-		app_sensors_read_and_steam();
+		app_sensors_read_and_stream();
 
 		k_sleep(K_SECONDS(get_loop_delay_s()));
 	}

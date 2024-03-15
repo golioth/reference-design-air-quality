@@ -16,8 +16,8 @@
 
 #include <golioth/client.h>
 
-void app_sensors_init(struct golioth_client *work_client);
-void app_sensors_read_and_steam(void);
+void app_sensors_set_client(struct golioth_client *sensors_client);
+void app_sensors_read_and_stream(void);
 
 #define LABEL_TEMPERATURE "Temperature"
 #define LABEL_PRESSURE	  "Pressure"
