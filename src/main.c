@@ -56,8 +56,7 @@ void wake_system_thread(void)
 	k_wakeup(_system_thread);
 }
 
-static void on_client_event(struct golioth_client *client,
-			    enum golioth_client_event event,
+static void on_client_event(struct golioth_client *client, enum golioth_client_event event,
 			    void *arg)
 {
 	bool is_connected = (event == GOLIOTH_CLIENT_EVENT_CONNECTED);
@@ -82,7 +81,6 @@ static void start_golioth_client(void)
 
 	/* Initialize DFU components */
 	golioth_fw_update_init(client, _current_version);
-
 
 	/*** Call Golioth APIs for other services in dedicated app files ***/
 
@@ -152,8 +150,8 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t
 void golioth_connection_led_set(uint8_t state)
 {
 	uint8_t pin_state = state ? 1 : 0;
-	/* Turn on Golioth logo LED once connected */
 #if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
+	/* Turn on Golioth logo LED once connected */
 	gpio_pin_set_dt(&golioth_led, pin_state);
 #endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 	/* Change the state of the Golioth LED on Ostentus */

@@ -135,10 +135,8 @@ static void rpc_log_if_register_failure(int err)
 	}
 }
 
-int app_rpc_register(struct golioth_client *client)
+void app_rpc_register(struct golioth_client *client)
 {
-
-
 	struct golioth_rpc *rpc = golioth_rpc_init(client);
 
 	int err;
@@ -157,6 +155,4 @@ int app_rpc_register(struct golioth_client *client)
 
 	err = golioth_rpc_register(rpc, "reset_pm_sensor", on_reset_pm_sensor, NULL);
 	rpc_log_if_register_failure(err);
-
-	return err;
 }
