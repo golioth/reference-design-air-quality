@@ -111,7 +111,7 @@ static enum golioth_settings_status on_scd4x_altitude_setting(int32_t new_value,
 static enum golioth_settings_status on_scd4x_asc_setting(bool new_value, void *arg)
 {
 	_scd4x_asc_s = new_value;
-	LOG_INF("Set SCD4x ASC to %s", _scd4x_altitude_s ? "true" : "false");
+	LOG_INF("Set SCD4x ASC to %s", _scd4x_asc_s ? "true" : "false");
 	/* Submit a work item to write this setting to the sensor */
 	k_work_submit(&scd4x_sensor_set_automatic_self_calibration_work);
 	return GOLIOTH_SETTINGS_SUCCESS;
@@ -199,8 +199,7 @@ int app_settings_register(struct golioth_client *client)
 							   on_sps30_cleaning_interval_setting,
 							   NULL);
 	if (err) {
-		LOG_ERR("Failed to register on_sps30_samples_per_measurement_setting callback: %d",
-			err);
+		LOG_ERR("Failed to register on_sps30_cleaning_interval_setting callback: %d", err);
 		return err;
 	}
 
