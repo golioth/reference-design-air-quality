@@ -5,13 +5,15 @@
  */
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(app_work, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 
-#include <net/golioth/system_client.h>
+#include <golioth/client.h>
+#include <golioth/stream.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
 
-#include "app_work.h"
+#include "app_sensors.h"
 #include "sensors.h"
 
 #ifdef CONFIG_LIB_OSTENTUS
@@ -32,18 +34,21 @@ static struct sps30_sensor_measurement sps30_sm;
 #define JSON_FMT "{\"tem\":%f,\"pre\":%f,\"hum\":%f,\"co2\":%u,\"mc_1p0\":%f,\"mc_2p5\":%f,\"mc_4p0\":%f,\"mc_10p0\":%f,\"nc_0p5\":%f,\"nc_1p0\":%f,\"nc_2p5\":%f,\"nc_4p0\":%f,\"nc_10p0\":%f,\"tps\":%f}"
 
 /* Callback for LightDB Stream */
-static int async_error_handler(struct golioth_req_rsp *rsp)
+
+static void async_error_handler(struct golioth_client *client,
+				const struct golioth_response *response,
+				const char *path,
+				void *arg)
 {
-	if (rsp->err) {
-		LOG_ERR("Async task failed: %d", rsp->err);
-		return rsp->err;
+	if (response->status != GOLIOTH_OK) {
+		LOG_ERR("Async task failed: %d", response->status);
+		return;
 	}
-	return 0;
 }
 
 /* This will be called by the main() loop */
 /* Do all of your work here! */
-void app_work_sensor_read(void)
+void app_sensors_read_and_steam(void)
 {
 	int err;
 	char json_buf[512];
@@ -51,7 +56,7 @@ void app_work_sensor_read(void)
 	LOG_DBG("Collecting battery measurements...");
 
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
-		read_and_report_battery();
+		read_and_report_battery(client);
 		IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 			slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
 			slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));
@@ -113,8 +118,13 @@ void app_work_sensor_read(void)
 		 sensor_value_to_double(&sps30_sm.nc_10p0),
 		 sensor_value_to_double(&sps30_sm.typical_particle_size));
 
-	err = golioth_stream_push_cb(client, "sensor", GOLIOTH_CONTENT_FORMAT_APP_JSON, json_buf,
-				     strlen(json_buf), async_error_handler, NULL);
+	err = golioth_stream_set_async(client,
+				       "sensor",
+				       GOLIOTH_CONTENT_TYPE_JSON,
+				       json_buf,
+				       strlen(json_buf),
+				       async_error_handler,
+				       NULL);
 	if (err) {
 		LOG_ERR("Failed to send sensor data to Golioth: %d", err);
 	}
@@ -122,7 +132,7 @@ void app_work_sensor_read(void)
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 		/* Update slide values on Ostentus
 		 *  -values should be sent as strings
-		 *  -use the enum from app_work.h for slide key values
+		 *  -use the enum from app_sensors.h for slide key values
 		 */
 		snprintk(json_buf, sizeof(json_buf), "%.2f °C", sensor_value_to_double(&bme280_sm.temperature));
 		slide_set(TEMPERATURE, json_buf, strlen(json_buf));
@@ -144,7 +154,7 @@ void app_work_sensor_read(void)
 	));
 }
 
-void app_work_init(struct golioth_client *work_client)
+void app_sensors_init(struct golioth_client *work_client)
 {
 	client = work_client;
 }
