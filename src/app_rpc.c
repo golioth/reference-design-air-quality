@@ -16,7 +16,8 @@ LOG_MODULE_REGISTER(app_rpc, LOG_LEVEL_DBG);
 #include <zcbor_common.h>
 
 #include "app_rpc.h"
-#include "sensors.h"
+#include "sensor_scd4x.h"
+#include "sensor_sps30.h"
 
 static void reboot_work_handler(struct k_work *work)
 {

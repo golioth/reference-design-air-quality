@@ -11,7 +11,8 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 #include <golioth/settings.h>
 #include "main.h"
 #include "app_settings.h"
-#include "sensors.h"
+#include "sensor_scd4x.h"
+#include "sensor_sps30.h"
 
 static int32_t _loop_delay_s = 60;
 #define LOOP_DELAY_S_MAX 43200

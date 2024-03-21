@@ -12,7 +12,8 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #include "app_settings.h"
 #include "app_state.h"
 #include "app_sensors.h"
-#include "sensors.h"
+#include "sensor_scd4x.h"
+#include "sensor_sps30.h"
 #include <golioth/client.h>
 #include <golioth/fw_update.h>
 #include <samples/common/net_connect.h>
@@ -183,6 +184,9 @@ int main(void)
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
 
+	/* Initialize sensors */
+	app_sensors_init();
+
 #if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 	/* Initialize Golioth logo LED */
 	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
@@ -262,24 +266,6 @@ int main(void)
 		/* Start Ostentus slideshow with 30 second delay between slides */
 		slideshow(30000);
 	));
-
-	/* Initialize weather sensor */
-	err = bme280_sensor_init();
-	if (err) {
-		return err;
-	}
-
-	/* Initialize CO₂ sensor */
-	err = scd4x_sensor_init();
-	if (err) {
-		return err;
-	}
-
-	/* Initialize PM sensor */
-	err = sps30_sensor_init();
-	if (err) {
-		return err;
-	}
 
 	while (true) {
 		app_sensors_read_and_stream();

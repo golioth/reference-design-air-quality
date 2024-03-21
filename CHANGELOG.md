@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Split sensor functions into separate files for each sensor.
 - Upgrade `golioth-firmware-sdk` to `v0.11.1`.
 - Increase the Golioth CoAP request queue size to prevent requests from failing
   to enqueue in some cases.

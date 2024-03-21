@@ -14,7 +14,9 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 #include <zephyr/drivers/sensor.h>
 
 #include "app_sensors.h"
-#include "sensors.h"
+#include "sensor_bme280.h"
+#include "sensor_scd4x.h"
+#include "sensor_sps30.h"
 
 #ifdef CONFIG_LIB_OSTENTUS
 #include <libostentus.h>
@@ -24,11 +26,6 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 #endif
 
 static struct golioth_client *client;
-
-/* Sensor readings */
-static struct bme280_sensor_measurement bme280_sm;
-static struct scd4x_sensor_measurement scd4x_sm;
-static struct sps30_sensor_measurement sps30_sm;
 
 /* Formatting string for sending sensor JSON to Golioth */
 /* clang-format off */
@@ -51,6 +48,18 @@ static struct sps30_sensor_measurement sps30_sm;
 "}"
 /* clang-format on */
 
+void app_sensors_init(void)
+{
+	/* Initialize weather sensor */
+	bme280_sensor_init();
+
+	/* Initialize CO₂ sensor */
+	scd4x_sensor_init();
+
+	/* Initialize PM sensor */
+	sps30_sensor_init();
+}
+
 /* Callback for LightDB Stream */
 static void async_error_handler(struct golioth_client *client,
 				const struct golioth_response *response,
@@ -69,6 +78,9 @@ void app_sensors_read_and_stream(void)
 {
 	int err;
 	char json_buf[512];
+	static struct bme280_sensor_measurement bme280_sm;
+	static struct scd4x_sensor_measurement scd4x_sm;
+	static struct sps30_sensor_measurement sps30_sm;
 
 	LOG_DBG("Collecting battery measurements...");
 
@@ -87,10 +99,7 @@ void app_sensors_read_and_stream(void)
 	if (err) {
 		LOG_ERR("Failed to read from Weather Sensor BME280: %d", err);
 	} else {
-		LOG_DBG("BME280: Temperature=%.2f °C, Pressure=%.2f kPa, Humidity=%.2f %%RH",
-			sensor_value_to_double(&bme280_sm.temperature),
-			sensor_value_to_double(&bme280_sm.pressure),
-			sensor_value_to_double(&bme280_sm.humidity));
+		bme280_log_measurements(&bme280_sm);
 	}
 
 	/* Read the CO₂ sensor */
@@ -98,9 +107,7 @@ void app_sensors_read_and_stream(void)
 	if (err) {
 		LOG_ERR("Failed to read from Co2 Sensor SCD4x: %d", err);
 	} else {
-		LOG_DBG("scd4x: CO₂=%u ppm, Temperature=%.2lf °C, Humidity=%.2lf %%RH",
-		scd4x_sm.co2, sensor_value_to_double(&scd4x_sm.temperature), sensor_value_to_double(&scd4x_sm.humidity));
-
+		scd4x_log_measurements(&scd4x_sm);
 	}
 
 	/* Read the PM sensor */
@@ -108,16 +115,7 @@ void app_sensors_read_and_stream(void)
 	if (err) {
 		LOG_ERR("Failed to read from PM Sensor SPS30: %d", err);
 	} else {
-		LOG_DBG("sps30: "
-		"PM1.0=%f μg/m³, PM2.5=%f μg/m³, "
-		"PM4.0=%f μg/m³, PM10.0=%f μg/m³, "
-		"NC0.5=%f #/cm³, NC1.0=%f #/cm³, "
-		"NC2.5=%f #/cm³, NC4.0=%f #/cm³, "
-		"NC10.0=%f #/cm³, Typical Particle Size=%f μm",
-		sensor_value_to_double(&sps30_sm.mc_1p0), sensor_value_to_double(&sps30_sm.mc_2p5), sensor_value_to_double(&sps30_sm.mc_4p0),
-		sensor_value_to_double(&sps30_sm.mc_10p0), sensor_value_to_double(&sps30_sm.nc_0p5), sensor_value_to_double(&sps30_sm.nc_1p0),
-		sensor_value_to_double(&sps30_sm.nc_2p5), sensor_value_to_double(&sps30_sm.nc_4p0), sensor_value_to_double(&sps30_sm.nc_10p0),
-		sensor_value_to_double(&sps30_sm.typical_particle_size));
+		sps30_log_measurements(&sps30_sm);
 	}
 
 	/* Send sensor data to Golioth */
