@@ -31,10 +31,27 @@ static struct scd4x_sensor_measurement scd4x_sm;
 static struct sps30_sensor_measurement sps30_sm;
 
 /* Formatting string for sending sensor JSON to Golioth */
-#define JSON_FMT "{\"tem\":%f,\"pre\":%f,\"hum\":%f,\"co2\":%u,\"mc_1p0\":%f,\"mc_2p5\":%f,\"mc_4p0\":%f,\"mc_10p0\":%f,\"nc_0p5\":%f,\"nc_1p0\":%f,\"nc_2p5\":%f,\"nc_4p0\":%f,\"nc_10p0\":%f,\"tps\":%f}"
+/* clang-format off */
+#define JSON_FMT \
+"{" \
+	"\"tem\":%f," \
+	"\"pre\":%f," \
+	"\"hum\":%f," \
+	"\"co2\":%u," \
+	"\"mc_1p0\":%f," \
+	"\"mc_2p5\":%f," \
+	"\"mc_4p0\":%f," \
+	"\"mc_10p0\":%f," \
+	"\"nc_0p5\":%f," \
+	"\"nc_1p0\":%f," \
+	"\"nc_2p5\":%f," \
+	"\"nc_4p0\":%f," \
+	"\"nc_10p0\":%f," \
+	"\"tps\":%f" \
+"}"
+/* clang-format on */
 
 /* Callback for LightDB Stream */
-
 static void async_error_handler(struct golioth_client *client,
 				const struct golioth_response *response,
 				const char *path,
