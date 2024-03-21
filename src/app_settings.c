@@ -129,6 +129,8 @@ static enum golioth_settings_status on_sps30_cleaning_interval_setting(int32_t n
 {
 	_sps30_cleaning_interval_s = (uint32_t)new_value;
 	LOG_INF("Set SPS30 cleaning interval to %i seconds", _sps30_cleaning_interval_s);
+	/* Submit a work item to write this setting to the sensor */
+	k_work_submit(&sps30_sensor_set_fan_auto_cleaning_interval_work);
 	return GOLIOTH_SETTINGS_SUCCESS;
 }
 
