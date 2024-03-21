@@ -61,6 +61,10 @@ This firmware can be built for a variety of supported hardware platforms.
           :width: 240
      - ``aludel_mini_v1_sparkfun9160_ns``
      - `Air Quality Monitor Project Page`_
+   * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
+          :width: 240
+     - ``aludel_elixir_ns``
+     -
 
 Firmware Overview
 *****************
