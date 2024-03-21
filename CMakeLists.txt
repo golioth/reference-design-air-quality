@@ -3,6 +3,10 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+if((BOARD STREQUAL nrf9160dk_nrf9160) OR (BOARD STREQUAL nrf9160dk_nrf9160_ns))
+  set(SHIELD "arduino_uno_click")
+endif()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(air_quality)
@@ -17,10 +21,10 @@ target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/app_rpc.c)
 target_sources(app PRIVATE src/app_settings.c)
 target_sources(app PRIVATE src/app_state.c)
-target_sources(app PRIVATE src/app_work.c)
-target_sources(app PRIVATE src/dfu/app_dfu.c)
-target_sources_ifdef(CONFIG_BOOTLOADER_MCUBOOT app PRIVATE src/dfu/flash.c)
-target_sources(app PRIVATE src/sensors.c)
+target_sources(app PRIVATE src/app_sensors.c)
+target_sources(app PRIVATE src/sensor_bme280.c)
+target_sources(app PRIVATE src/sensor_scd4x.c)
+target_sources(app PRIVATE src/sensor_sps30.c)
 target_sources(app PRIVATE external/sensirion/embedded-common/common/sensirion_common.c)
 target_sources(app PRIVATE external/sensirion/embedded-common/i2c/sensirion_i2c_hal.c)
 target_sources(app PRIVATE external/sensirion/embedded-common/i2c/sensirion_i2c.c)
