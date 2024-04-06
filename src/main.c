@@ -19,6 +19,7 @@ LOG_MODULE_REGISTER(golioth_air_quality, LOG_LEVEL_DBG);
 #include <samples/common/net_connect.h>
 #include <samples/common/sample_credentials.h>
 #include <zephyr/kernel.h>
+#include <zephyr/drivers/regulator.h>
 
 #ifdef CONFIG_SOC_NRF9160
 #include <modem/lte_lc.h>
@@ -49,6 +50,10 @@ static const struct gpio_dt_spec golioth_led = GPIO_DT_SPEC_GET(DT_ALIAS(golioth
 #endif /* DT_NODE_EXISTS(DT_ALIAS(golioth_led)) */
 static const struct gpio_dt_spec user_btn = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
 static struct gpio_callback button_cb_data;
+
+#if DT_NODE_EXISTS(DT_NODELABEL(reg_mikrobus_5v))
+static const struct device *const reg = DEVICE_DT_GET(DT_NODELABEL(reg_mikrobus_5v));
+#endif /* DT_NODE_EXISTS(DT_NODELABEL(reg_mikrobus_5v)) */
 
 /* Forward declarations */
 void golioth_connection_led_set(uint8_t state);
@@ -183,6 +188,17 @@ int main(void)
 
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
+
+	/* Enable the 5V mikroBUS regulator */
+#if DT_NODE_EXISTS(DT_NODELABEL(reg_mikrobus_5v))
+	k_sleep(K_USEC(1000000)); /* Sleep 1s before enabling the regulator */
+	LOG_DBG("Enabling 5V mikroBUS regulator");
+	err = regulator_enable(reg);
+	if (err) {
+		LOG_ERR("Could not enable 5V mikroBUS regulator (%d)", err);
+	}
+	k_sleep(K_USEC(100000)); /* Sleep 100ms after enabling the regulator */
+#endif	/* DT_NODE_EXISTS(DT_NODELABEL(reg_mikrobus_5v)) */
 
 	/* Initialize sensors */
 	app_sensors_init();
