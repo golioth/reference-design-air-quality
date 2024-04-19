@@ -4,19 +4,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "nrf_dk_common.dtsi"
-
 / {
 	aliases {
 		golioth-led = &led2;
+		sensirion-hal-i2c = &mikrobus_i2c;
+	};
+};
+
+&mikrobus_i2c {
+	status = "okay";
+
+	/* SPS30 max clock frequency is 100 kbit/s */
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+
+	bme280: bme280@76 {
+		compatible = "bosch,bme280";
+		reg = <0x76>;
 	};
 };
 
 &pinctrl {
 	/*
-	 * Arduino Uno provides the same SCL/SDA on two sets of pins, but the
-	 * nRF9160-DK maps these pins to two different pairs of GPIO. When using
-	 * the Arduino Uno Click Shield board, the P0.18/P0.19 pair must be used.
+	 * The original Arduino Uno provides the same SCL/SDA on two sets of
+	 * pins, but the nRF9160 DK maps these pins to two different pairs of
+	 * GPIO. When using the Arduino Uno Click Shield board with the nRF9160
+	 * DK, the P0.18/P0.19 pair must be used.
 	 */
 	i2c2_default: i2c2_default {
 		group1 {
@@ -34,10 +46,10 @@
 	};
 
 	/*
-	 * The default pin group includes RTS/CTS HW flow control, but the Arduino
-	 * Uno Click Shield board does not connect these pins (only TX/RX are used).
-	 * This keeps RX/TX on the same pins, but just removes RTS/CTS from the
-	 * pin groups.
+	 * The default pin group for the nRF9160 DK includes RTS/CTS HW flow
+	 * control, but the Arduino Uno Click Shield board does not connect
+	 * these pins (only TX/RX are connected on the shield). This keeps RX/TX
+	 * on the same pins, but just removes RTS/CTS from the pin groups.
 	 */
 	uart1_default: uart1_default {
 		group1 {
