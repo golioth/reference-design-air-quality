@@ -16,13 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Merge changes from [`golioth/reference-design-template@template_v2.1.0`](https://github.com/golioth/reference-design-template/tree/template_v2.1.0).
 - Split sensor functions into separate files for each sensor.
-- Upgrade `golioth-firmware-sdk` to `v0.11.1`.
 - Increase the Golioth CoAP request queue size to prevent requests from failing
   to enqueue in some cases.
 - Prevent sending excessive warning log messages on flaky connections.
 - Only attempt to send sensor data when Golioth client is connected.
-- Merge changes from [`golioth/reference-design-template@813248f`](https://github.com/golioth/reference-design-template/tree/813248f9a0b1a882140f3906956b34f8dfee0e8a).
 
 ### Removed
 
