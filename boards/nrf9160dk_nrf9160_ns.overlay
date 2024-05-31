@@ -13,7 +13,6 @@
 
 &mikrobus_i2c {
 	status = "okay";
-
 	/* SPS30 max clock frequency is 100 kbit/s */
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 
