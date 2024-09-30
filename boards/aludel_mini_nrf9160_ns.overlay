@@ -1,9 +1,3 @@
-/*
- * Copyright (c) 2023 Golioth, Inc.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 / {
 	aliases {
 		sensirion-hal-i2c = &mikrobus_i2c;
@@ -11,7 +5,14 @@
 };
 
 &mikrobus_i2c {
-	status = "okay";
+	/* Needed for I2C writes used by libostentus */
+	zephyr,concat-buf-size = <48>;
+
+	ostentus@12 {
+		status = "okay";
+		compatible = "golioth,ostentus";
+		reg = <0x12>;
+	};
 
 	/* SPS30 max clock frequency is 100 kbit/s */
 	clock-frequency = <I2C_BITRATE_STANDARD>;

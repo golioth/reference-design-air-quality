@@ -1,5 +1,5 @@
 ..
-   Copyright (c) 2022-2023 Golioth, Inc.
+   Copyright (c) 2024 Golioth, Inc.
    SPDX-License-Identifier: Apache-2.0
 
 Air Quality Monitor Reference Design
@@ -80,14 +80,95 @@ Specifically, the following environmental parameters can be monitored:
 * 🌡️ Temperature (°C)
 * 💨 Pressure (kPa)
 
-The sensor values are uploaded to the LightDB stream database in the Golioth
-Cloud. The sensor sampling frequency and other sensor parameters are remotely
-configurable via the Golioth Settings service.
+Local set up
+************
 
-Supported Golioth Zephyr SDK Features
-=====================================
+.. pull-quote::
+   [!IMPORTANT]
 
-This firmware implements the following features from the Golioth Zephyr SDK:
+   Do not clone this repo using git. Zephyr's ``west`` meta tool should be used to
+   set up your local workspace.
+
+Install the Python virtual environment (recommended)
+====================================================
+
+.. code-block:: shell
+
+   cd ~
+   mkdir golioth-reference-design-air-quality
+   python -m venv golioth-reference-design-air-quality/.venv
+   source golioth-reference-design-air-quality/.venv/bin/activate
+   pip install wheel west
+
+Use ``west`` to initialize and install
+======================================
+
+.. code-block:: shell
+
+   cd ~/golioth-reference-design-air-quality
+   west init -m git@github.com:golioth/reference-design-air-quality.git .
+   west update
+   west zephyr-export
+   pip install -r deps/zephyr/scripts/requirements.txt
+
+Building the application
+************************
+
+Build the Zephyr sample application for the `Nordic nRF9160 DK`_
+(``nrf9160dk_nrf9160_ns``) from the top level of your project. After a
+successful build you will see a new ``build`` directory. Note that any changes
+(and git commits) to the project itself will be inside the ``app`` folder. The
+``build`` and ``deps`` directories being one level higher prevents the repo from
+cataloging all of the changes to the dependencies and the build (so no
+``.gitignore`` is needed).
+
+Prior to building, update ``VERSION`` file to reflect the firmware version number you want to assign
+to this build. Then run the following commands to build and program the firmware onto the device.
+
+
+.. pull-quote::
+   [!IMPORTANT]
+
+   You must perform a pristine build (use ``-p`` or remove the ``build`` directory)
+   after changing the firmware version number in the ``VERSION`` file for the change to take effect.
+
+.. code-block:: text
+
+   $ (.venv) west build -p -b nrf9160dk/nrf9160/ns --sysbuild app
+   $ (.venv) west flash
+
+Configure PSK-ID and PSK using the device shell based on your Golioth
+credentials and reboot:
+
+.. code-block:: text
+
+   uart:~$ settings set golioth/psk-id <my-psk-id@my-project>
+   uart:~$ settings set golioth/psk <my-psk>
+   uart:~$ kernel reboot cold
+
+Add Pipeline to Golioth
+***********************
+
+Golioth uses `Pipelines`_ to route stream data. This gives you flexibility to change your data
+routing without requiring updated device firmware.
+
+Whenever sending stream data, you must enable a pipeline in your Golioth project to configure how
+that data is handled. Add the contents of ``pipelines/cbor-to-lightdb.yml`` as a new pipeline as
+follows (note that this is the default pipeline for new projects and may already be present):
+
+   1. Navigate to your project on the Golioth web console.
+   2. Select ``Pipelines`` from the left sidebar and click the ``Create`` button.
+   3. Give your new pipeline a name and paste the pipeline configuration into the editor.
+   4. Click the toggle in the bottom right to enable the pipeline and then click ``Create``.
+
+All data streamed to Golioth in CBOR format will now be routed to LightDB Stream and may be viewed
+using the web console. You may change this behavior at any time without updating firmware simply by
+editing this pipeline entry.
+
+Golioth Features
+****************
+
+This app implements:
 
 - `Device Settings Service <https://docs.golioth.io/firmware/zephyr-device-sdk/device-settings-service>`_
 - `LightDB State Client <https://docs.golioth.io/firmware/zephyr-device-sdk/light-db/>`_
@@ -96,8 +177,8 @@ This firmware implements the following features from the Golioth Zephyr SDK:
 - `Over-the-Air (OTA) Firmware Upgrade <https://docs.golioth.io/firmware/device-sdk/firmware-upgrade>`_
 - `Remote Procedure Call (RPC) <https://docs.golioth.io/firmware/zephyr-device-sdk/remote-procedure-call>`_
 
-Device Settings Service
------------------------
+Settings Service
+================
 
 The following settings can be set in the Device Settings menu of the `Golioth
 Console`_.
@@ -141,7 +222,7 @@ Console`_.
    Default value is ``604800`` seconds (168 hours or 1 week).
 
 LightDB Stream Service
-----------------------
+======================
 
 Sensor data is periodically sent to the following ``sensor/*`` endpoints of the
 LightDB Stream service:
@@ -168,7 +249,7 @@ level readings are periodically sent to the following ``battery/*`` endpoints:
 * ``battery/batt_lvl``: Battery Level (%)
 
 LightDB State Service
----------------------
+=====================
 
 The concept of Digital Twin is demonstrated with the LightDB State
 ``example_int0`` and ``example_int1`` variables that are members of the
@@ -184,7 +265,7 @@ The concept of Digital Twin is demonstrated with the LightDB State
   the ``state`` endpoints.
 
 Remote Procedure Call (RPC) Service
------------------------------------
+===================================
 
 The following RPCs can be initiated in the Remote Procedure Call menu of the
 `Golioth Console`_.
@@ -214,111 +295,54 @@ The following RPCs can be initiated in the Remote Procedure Call menu of the
 ``reset_pm_sensor``
    Reset the SPS30 particulate matter sensor.
 
-Building the firmware
-*********************
+Hardware Variations
+*******************
 
-The firmware build instructions below assume you have already set up a Zephyr
-development environment and have some basic familiarity with building firmware
-using the Zephyr Real Time Operating System (RTOS).
+This reference design may be built for a variety of different boards.
 
-If you're brand new to building firmware with Zephyr, you will need to follow
-the `Zephyr Getting Started Guide`_ to install the Zephyr SDK and related
-dependencies.
+Prior to building, update ``VERSION`` file to reflect the firmware version number you want to assign
+to this build. Then run the following commands to build and program the firmware onto the device.
 
-We also provide free online `Developer Training`_ for Zephyr at:
+Golioth Aludel Mini
+===================
 
-https://training.golioth.io/docs/zephyr-training
-
-.. pull-quote::
-   [!IMPORTANT]
-
-   Do not clone this repo using git. Zephyr's ``west`` meta-tool should be used
-   to set up your local workspace.
-
-Create a Python virtual environment (recommended)
-=================================================
-
-.. code-block:: shell
-
-   cd ~
-   mkdir golioth-reference-design-air-quality
-   python -m venv golioth-reference-design-air-quality/.venv
-   source golioth-reference-design-air-quality/.venv/bin/activate
-
-Install ``west`` meta-tool
-==========================
-
-.. code-block:: shell
-
-   pip install wheel west
-
-Use ``west`` to initialize the workspace and install dependencies
-=================================================================
-
-.. code-block:: shell
-
-   cd ~/golioth-reference-design-air-quality
-   west init -m git@github.com:golioth/reference-design-air-quality.git .
-   west update
-   west zephyr-export
-   pip install -r deps/zephyr/scripts/requirements.txt
-
-Build the firmware
-==================
-
-Build the Zephyr firmware from the top-level workspace of your project. After a
-successful build you will see a new ``build/`` directory.
-
-Note that this git repository was cloned into the ``app`` folder, so any changes
-you make to the application itself should be committed inside this repository.
-The ``build`` and ``deps`` directories in the root of the workspace are managed
-outside of this git repository by the ``west`` meta-tool.
-
-Prior to building, update ``CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION`` in the
-``prj.conf`` file to reflect the firmware version number you want to assign to
-this build.
-
-.. pull-quote::
-   [!IMPORTANT]
-
-   When running the commands below, make sure to replace the placeholder
-   ``<your_zephyr_board_id>`` with the actual Zephyr board from the table above
-   that matches your follow-along hardware.
+This reference design may be built for the Golioth Aludel Mini board.
 
 .. code-block:: text
 
-   $ (.venv) west build -p -b <your_zephyr_board_id> app
-
-For example, to build firmware for the `Nordic nRF9160 DK`_-based follow-along
-hardware:
-
-.. code-block:: text
-
-   $ (.venv) west build -p -b nrf9160dk_nrf9160_ns app
-
-Flash the firmware
-==================
-
-.. code-block:: text
-
+   $ (.venv) west build -p -b aludel_mini/nrf9160/ns --sysbuild app
    $ (.venv) west flash
 
-Provision the device
-====================
+Golioth Aludel Elixir
+=====================
 
-In order for the device to securely authenticate with the Golioth Cloud, we need
-to provision the device with a pre-shared key (PSK). This key will persist
-across reboots and only needs to be set once after the device firmware has been
-programmed. In addition, flashing new firmware images with ``west flash`` should
-not erase these stored settings unless the entire device flash is erased.
-
-Configure the PSK-ID and PSK using the device UART shell and reboot the device:
+This reference design may be built for the Golioth Aludel Elixir board. By default this will build
+for the latest hardware revision of this board.
 
 .. code-block:: text
 
-   uart:~$ settings set golioth/psk-id <my-psk-id@my-project>
-   uart:~$ settings set golioth/psk <my-psk>
-   uart:~$ kernel reboot cold
+   $ (.venv) west build -p -b aludel_elixir/nrf9160/ns --sysbuild app
+   $ (.venv) west flash
+
+To build for a specific board revision (e.g. Rev A) add the revision suffix ``@<rev>``.
+
+.. code-block:: text
+
+   $ (.venv) west build -p -b aludel_elixir@A/nrf9160/ns --sysbuild app
+   $ (.venv) west flash
+
+OTA Firmware Update
+*******************
+
+This application includes the ability to perform Over-the-Air (OTA) firmware updates:
+
+1. Update the version number in the `VERSION` file and perform a pristine (important) build to
+   incorporate the version change.
+2. Upload the `build/app/zephyr/zephyr.signed.bin` file as an artifact for your Golioth project
+   using `main` as the package name.
+3. Create and roll out a release based on this artifact.
+
+Visit `the Golioth Docs OTA Firmware Upgrade page`_ for more info.
 
 External Libraries
 ******************
@@ -334,40 +358,10 @@ from ``west.yml`` and remove the includes/function calls from the C code.
 * `zephyr-network-info`_ is a helper library for querying, formatting, and
   returning network connection information via Zephyr log or Golioth RPC
 
-Pulling in updates from the Reference Design Template
-*****************************************************
-
-This reference design was forked from the `Reference Design Template`_ repo. We
-recommend the following workflow to pull in future changes:
-
-* Setup
-
-  * Create a ``template`` remote based on the Reference Design Template
-    repository
-
-* Merge in template changes
-
-  * Fetch template changes and tags
-  * Merge template release tag into your ``main`` (or other branch)
-  * Resolve merge conflicts (if any) and commit to your repository
-
-.. code-block:: shell
-
-   # Setup
-   git remote add template https://github.com/golioth/reference-design-template.git
-   git fetch template --tags
-
-   # Merge in template changes
-   git fetch template --tags
-   git checkout your_local_branch
-   git merge template_v1.0.0
-
-   # Resolve merge conflicts if necessary
-   git add resolved_files
-   git commit
-
 .. _Golioth Console: https://console.golioth.io
 .. _Nordic nRF9160 DK: https://www.nordicsemi.com/Products/Development-hardware/nrf9160-dk
+.. _Pipelines: https://docs.golioth.io/data-routing
+.. _the Golioth Docs OTA Firmware Upgrade page: https://docs.golioth.io/firmware/golioth-firmware-sdk/firmware-upgrade/firmware-upgrade
 .. _golioth-zephyr-boards: https://github.com/golioth/golioth-zephyr-boards
 .. _libostentus: https://github.com/golioth/libostentus
 .. _MikroE Arduino UNO click shield: https://www.mikroe.com/arduino-uno-click-shield
@@ -380,4 +374,5 @@ recommend the following workflow to pull in future changes:
 .. _Zephyr Getting Started Guide: https://docs.zephyrproject.org/latest/develop/getting_started/
 .. _Developer Training: https://training.golioth.io
 .. _SemVer: https://semver.org
+.. _the Golioth Docs OTA Firmware Upgrade page: https://docs.golioth.io/firmware/golioth-firmware-sdk/firmware-upgrade/firmware-upgrade
 .. _zephyr-network-info: https://github.com/golioth/zephyr-network-info
