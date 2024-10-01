@@ -168,9 +168,6 @@ int main(void)
 {
 	int err;
 
-	/* Workaround for https://github.com/golioth/golioth-firmware-sdk/issues/413 */
-	log_filter_set(NULL, 0, log_source_id_get("golioth_coap_client_zephyr"), LOG_LEVEL_ERR);
-
 	LOG_DBG("Started air quality monitor app");
 
 	LOG_INF("Firmware version: %s", _current_version);
