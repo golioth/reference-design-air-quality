@@ -12,11 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Pipeline example
 - Add support for the Aludel Elixir (`aludel_elixir_ns`) board.
 
 ### Changed
 
-- Merge changes from [`golioth/reference-design-template@template_v2.1.0`](https://github.com/golioth/reference-design-template/tree/template_v2.1.0).
+- Merge changes from [`golioth/reference-design-template@template_v2.4.1`](https://github.com/golioth/reference-design-template/tree/template_v2.4.1).
 - Split sensor functions into separate files for each sensor.
 - Increase the Golioth CoAP request queue size to prevent requests from failing
   to enqueue in some cases.
