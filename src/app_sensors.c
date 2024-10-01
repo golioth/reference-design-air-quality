@@ -84,10 +84,9 @@ void app_sensors_read_and_stream(void)
 	static struct scd4x_sensor_measurement scd4x_sm;
 	static struct sps30_sensor_measurement sps30_sm;
 
-	LOG_DBG("Collecting battery measurements...");
-
 	/* Golioth custom hardware for demos */
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
+		LOG_DBG("Collecting battery measurements...");
 		read_and_report_battery(client);
 		IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 			ostentus_slide_set(o_dev,
