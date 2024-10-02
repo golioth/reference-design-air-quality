@@ -195,9 +195,6 @@ int main(void)
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
 
-	/* Initialize sensors */
-	app_sensors_init();
-
 #if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 	/* Initialize Golioth logo LED */
 	err = gpio_pin_configure_dt(&golioth_led, GPIO_OUTPUT_INACTIVE);
@@ -228,6 +225,9 @@ int main(void)
 	/* Block until connected to Golioth */
 	k_sem_take(&connected, K_FOREVER);
 #endif /* CONFIG_SOC_NRF9160 */
+
+	/* Initialize sensors */
+	app_sensors_init();
 
 	/* Set up user button */
 	err = gpio_pin_configure_dt(&user_btn, GPIO_INPUT);
