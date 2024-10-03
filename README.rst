@@ -59,12 +59,8 @@ This firmware can be built for a variety of supported hardware platforms.
      - Project Page
    * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
           :width: 240
-     - ``aludel_mini_v1_sparkfun9160_ns``
-     - `Air Quality Monitor Project Page`_
-   * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
-          :width: 240
      - ``aludel_elixir_ns``
-     -
+     - `Air Quality Monitor Project Page`_
 
 Firmware Overview
 *****************
@@ -153,7 +149,7 @@ Golioth uses `Pipelines`_ to route stream data. This gives you flexibility to ch
 routing without requiring updated device firmware.
 
 Whenever sending stream data, you must enable a pipeline in your Golioth project to configure how
-that data is handled. Add the contents of ``pipelines/cbor-to-lightdb.yml`` as a new pipeline as
+that data is handled. Add the contents of ``pipelines/json-to-lightdb.yml`` as a new pipeline as
 follows (note that this is the default pipeline for new projects and may already be present):
 
    1. Navigate to your project on the Golioth web console.
@@ -161,7 +157,7 @@ follows (note that this is the default pipeline for new projects and may already
    3. Give your new pipeline a name and paste the pipeline configuration into the editor.
    4. Click the toggle in the bottom right to enable the pipeline and then click ``Create``.
 
-All data streamed to Golioth in CBOR format will now be routed to LightDB Stream and may be viewed
+All data streamed to Golioth in JSON format will now be routed to LightDB Stream and may be viewed
 using the web console. You may change this behavior at any time without updating firmware simply by
 editing this pipeline entry.
 
@@ -303,16 +299,6 @@ This reference design may be built for a variety of different boards.
 Prior to building, update ``VERSION`` file to reflect the firmware version number you want to assign
 to this build. Then run the following commands to build and program the firmware onto the device.
 
-Golioth Aludel Mini
-===================
-
-This reference design may be built for the Golioth Aludel Mini board.
-
-.. code-block:: text
-
-   $ (.venv) west build -p -b aludel_mini/nrf9160/ns --sysbuild app
-   $ (.venv) west flash
-
 Golioth Aludel Elixir
 =====================
 
@@ -352,7 +338,7 @@ custom hardware to which they apply, you can safely remove these repositories
 from ``west.yml`` and remove the includes/function calls from the C code.
 
 * `golioth-zephyr-boards`_ includes the board definitions for the Golioth
-  Aludel-Mini
+  Aludel-Elixir
 * `libostentus`_ is a helper library for controlling the Ostentus ePaper
   faceplate
 * `zephyr-network-info`_ is a helper library for querying, formatting, and

@@ -168,9 +168,6 @@ int main(void)
 {
 	int err;
 
-	/* Workaround for https://github.com/golioth/golioth-firmware-sdk/issues/413 */
-	log_filter_set(NULL, 0, log_source_id_get("golioth_coap_client_zephyr"), LOG_LEVEL_ERR);
-
 	LOG_DBG("Started air quality monitor app");
 
 	LOG_INF("Firmware version: %s", _current_version);
@@ -197,9 +194,6 @@ int main(void)
 
 	/* Get system thread id so loop delay change event can wake main */
 	_system_thread = k_current_get();
-
-	/* Initialize sensors */
-	app_sensors_init();
 
 #if DT_NODE_EXISTS(DT_ALIAS(golioth_led))
 	/* Initialize Golioth logo LED */
@@ -231,6 +225,9 @@ int main(void)
 	/* Block until connected to Golioth */
 	k_sem_take(&connected, K_FOREVER);
 #endif /* CONFIG_SOC_NRF9160 */
+
+	/* Initialize sensors */
+	app_sensors_init();
 
 	/* Set up user button */
 	err = gpio_pin_configure_dt(&user_btn, GPIO_INPUT);

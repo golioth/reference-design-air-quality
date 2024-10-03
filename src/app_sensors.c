@@ -9,7 +9,6 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 
 #include <golioth/client.h>
 #include <golioth/stream.h>
-#include <zcbor_encode.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
@@ -50,6 +49,8 @@ static struct golioth_client *client;
 "}"
 /* clang-format on */
 
+#define JSON_BUF_SIZE 512
+
 void app_sensors_init(void)
 {
 	/* Initialize weather sensor */
@@ -79,15 +80,13 @@ static void async_error_handler(struct golioth_client *client,
 void app_sensors_read_and_stream(void)
 {
 	int err;
-	char json_buf[512];
 	static struct bme280_sensor_measurement bme280_sm;
 	static struct scd4x_sensor_measurement scd4x_sm;
 	static struct sps30_sensor_measurement sps30_sm;
 
-	LOG_DBG("Collecting battery measurements...");
-
 	/* Golioth custom hardware for demos */
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
+		LOG_DBG("Collecting battery measurements...");
 		read_and_report_battery(client);
 		IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 			ostentus_slide_set(o_dev,
@@ -128,10 +127,17 @@ void app_sensors_read_and_stream(void)
 	}
 
 	/* Send sensor data to Golioth */
+	char *json_buf = malloc(sizeof(char) * JSON_BUF_SIZE);
+
+	if (!json_buf) {
+		LOG_ERR("Unable to allocate memory for JSON buffer. Reading will not be sent.");
+		return;
+	}
+
 	if (golioth_client_is_connected(client)) {
 		LOG_DBG("Sending sensor data to Golioth");
 
-		snprintk(json_buf, sizeof(json_buf), JSON_FMT,
+		snprintk(json_buf, JSON_BUF_SIZE, JSON_FMT,
 			sensor_value_to_double(&bme280_sm.temperature),
 			sensor_value_to_double(&bme280_sm.pressure),
 			sensor_value_to_double(&bme280_sm.humidity), scd4x_sm.co2,
@@ -159,30 +165,36 @@ void app_sensors_read_and_stream(void)
 		LOG_WRN("Device is not connected to Golioth, unable to send sensor data");
 	}
 
+
 	/* Golioth custom hardware for demos */
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 		/* Update slide values on Ostentus
 		 *  -values should be sent as strings
 		 *  -use the enum from app_sensors.h for slide key values
 		 */
-		snprintk(json_buf, sizeof(json_buf), "%.2f °C", sensor_value_to_double(&bme280_sm.temperature));
+		snprintk(json_buf, JSON_BUF_SIZE, "%.2f °C",
+			 sensor_value_to_double(&bme280_sm.temperature));
 		ostentus_slide_set(o_dev, TEMPERATURE, json_buf, strlen(json_buf));
 
-		snprintk(json_buf, sizeof(json_buf), "%.2f kPa", sensor_value_to_double(&bme280_sm.pressure));
+		snprintk(json_buf, JSON_BUF_SIZE, "%.2f kPa",
+			 sensor_value_to_double(&bme280_sm.pressure));
 		ostentus_slide_set(o_dev, PRESSURE, json_buf, strlen(json_buf));
 
-		snprintk(json_buf, sizeof(json_buf), "%.2f %%RH", sensor_value_to_double(&bme280_sm.humidity));
+		snprintk(json_buf, JSON_BUF_SIZE, "%.2f %%RH",
+			 sensor_value_to_double(&bme280_sm.humidity));
 		ostentus_slide_set(o_dev, HUMIDITY, json_buf, strlen(json_buf));
 
-		snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
+		snprintk(json_buf, JSON_BUF_SIZE, "%u ppm", scd4x_sm.co2);
 		ostentus_slide_set(o_dev, CO2, json_buf, strlen(json_buf));
 
-		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
+		snprintk(json_buf, JSON_BUF_SIZE, "%d ug/m^3", sps30_sm.mc_2p5.val1);
 		ostentus_slide_set(o_dev, PM2P5, json_buf, strlen(json_buf));
 
-		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
+		snprintk(json_buf, JSON_BUF_SIZE, "%d ug/m^3", sps30_sm.mc_10p0.val1);
 		ostentus_slide_set(o_dev, PM10P0, json_buf, strlen(json_buf));
 	));
+
+	free(json_buf);
 }
 
 void app_sensors_set_client(struct golioth_client *sensors_client)
