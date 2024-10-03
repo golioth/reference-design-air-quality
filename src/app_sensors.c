@@ -9,6 +9,7 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 
 #include <golioth/client.h>
 #include <golioth/stream.h>
+#include <zcbor_encode.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
@@ -20,6 +21,7 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 
 #ifdef CONFIG_LIB_OSTENTUS
 #include <libostentus.h>
+static const struct device *o_dev = DEVICE_DT_GET_ANY(golioth_ostentus);
 #endif
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 #include "battery_monitor/battery.h"
@@ -84,11 +86,18 @@ void app_sensors_read_and_stream(void)
 
 	LOG_DBG("Collecting battery measurements...");
 
+	/* Golioth custom hardware for demos */
 	IF_ENABLED(CONFIG_ALUDEL_BATTERY_MONITOR, (
 		read_and_report_battery(client);
 		IF_ENABLED(CONFIG_LIB_OSTENTUS, (
-			slide_set(BATTERY_V, get_batt_v_str(), strlen(get_batt_v_str()));
-			slide_set(BATTERY_LVL, get_batt_lvl_str(), strlen(get_batt_lvl_str()));
+			ostentus_slide_set(o_dev,
+					   BATTERY_V,
+					   get_batt_v_str(),
+					   strlen(get_batt_v_str()));
+			ostentus_slide_set(o_dev,
+					   BATTERY_LVL,
+					   get_batt_lvl_str(),
+					   strlen(get_batt_lvl_str()));
 		));
 	));
 
@@ -150,28 +159,29 @@ void app_sensors_read_and_stream(void)
 		LOG_WRN("Device is not connected to Golioth, unable to send sensor data");
 	}
 
+	/* Golioth custom hardware for demos */
 	IF_ENABLED(CONFIG_LIB_OSTENTUS, (
 		/* Update slide values on Ostentus
 		 *  -values should be sent as strings
 		 *  -use the enum from app_sensors.h for slide key values
 		 */
 		snprintk(json_buf, sizeof(json_buf), "%.2f °C", sensor_value_to_double(&bme280_sm.temperature));
-		slide_set(TEMPERATURE, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, TEMPERATURE, json_buf, strlen(json_buf));
 
 		snprintk(json_buf, sizeof(json_buf), "%.2f kPa", sensor_value_to_double(&bme280_sm.pressure));
-		slide_set(PRESSURE, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, PRESSURE, json_buf, strlen(json_buf));
 
 		snprintk(json_buf, sizeof(json_buf), "%.2f %%RH", sensor_value_to_double(&bme280_sm.humidity));
-		slide_set(HUMIDITY, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, HUMIDITY, json_buf, strlen(json_buf));
 
 		snprintk(json_buf, sizeof(json_buf), "%u ppm", scd4x_sm.co2);
-		slide_set(CO2, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, CO2, json_buf, strlen(json_buf));
 
 		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_2p5.val1);
-		slide_set(PM2P5, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, PM2P5, json_buf, strlen(json_buf));
 
 		snprintk(json_buf, sizeof(json_buf), "%d ug/m^3", sps30_sm.mc_10p0.val1);
-		slide_set(PM10P0, json_buf, strlen(json_buf));
+		ostentus_slide_set(o_dev, PM10P0, json_buf, strlen(json_buf));
 	));
 }
 

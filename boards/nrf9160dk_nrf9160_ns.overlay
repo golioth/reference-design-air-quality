@@ -7,13 +7,11 @@
 / {
 	aliases {
 		golioth-led = &led2;
-		sensirion-hal-i2c = &mikrobus_i2c;
+		sensirion-hal-i2c = &arduino_i2c;
 	};
 };
 
-&mikrobus_i2c {
-	status = "okay";
-
+&arduino_i2c {
 	/* SPS30 max clock frequency is 100 kbit/s */
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 
