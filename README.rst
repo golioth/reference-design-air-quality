@@ -59,12 +59,8 @@ This firmware can be built for a variety of supported hardware platforms.
      - Project Page
    * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
           :width: 240
-     - ``aludel_mini_v1_sparkfun9160_ns``
-     - `Air Quality Monitor Project Page`_
-   * - .. image:: images/air_quality_monitor_aludel_mini_v1_photo_top.jpg
-          :width: 240
      - ``aludel_elixir_ns``
-     -
+     - `Air Quality Monitor Project Page`_
 
 Firmware Overview
 *****************
@@ -303,16 +299,6 @@ This reference design may be built for a variety of different boards.
 Prior to building, update ``VERSION`` file to reflect the firmware version number you want to assign
 to this build. Then run the following commands to build and program the firmware onto the device.
 
-Golioth Aludel Mini
-===================
-
-This reference design may be built for the Golioth Aludel Mini board.
-
-.. code-block:: text
-
-   $ (.venv) west build -p -b aludel_mini/nrf9160/ns --sysbuild app
-   $ (.venv) west flash
-
 Golioth Aludel Elixir
 =====================
 
@@ -352,7 +338,7 @@ custom hardware to which they apply, you can safely remove these repositories
 from ``west.yml`` and remove the includes/function calls from the C code.
 
 * `golioth-zephyr-boards`_ includes the board definitions for the Golioth
-  Aludel-Mini
+  Aludel-Elixir
 * `libostentus`_ is a helper library for controlling the Ostentus ePaper
   faceplate
 * `zephyr-network-info`_ is a helper library for querying, formatting, and
