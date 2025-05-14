@@ -220,7 +220,10 @@ version number than what is currently running on the device.
 2. Upload the `build/app/zephyr/zephyr.signed.bin` file as a Package for
    your Golioth project.
 
-   - Use `main` as the package name.
+   - Use either `nrf9160dk` or `aludel_elixir` as the package name,
+     depending on which board the update file was built for. (These
+     package names were configured in this repository's board `.conf`
+     files.) Use `main` as the package name.
    - Use the same version number from step 1.
 
 3. Create a Cohort and add your device to it.
