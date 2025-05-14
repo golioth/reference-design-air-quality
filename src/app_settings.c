@@ -16,7 +16,7 @@ LOG_MODULE_REGISTER(app_settings, LOG_LEVEL_DBG);
 
 static int32_t _loop_delay_s = 60;
 #define LOOP_DELAY_S_MAX 43200
-#define LOOP_DELAY_S_MIN 0
+#define LOOP_DELAY_S_MIN 1
 
 static int32_t _scd4x_temperature_offset_s = 4;
 static uint16_t _scd4x_altitude_s;

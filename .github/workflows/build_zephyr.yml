@@ -13,7 +13,7 @@ on:
       BOARD:
         required: true
         type: string
-        default: aludel_elixir/nrf9160/ns
+        default: nrf9160dk/nrf9160/ns
       ARTIFACT:
         required: true
         type: boolean
