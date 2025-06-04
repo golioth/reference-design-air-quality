@@ -9,6 +9,7 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 
 #include <golioth/client.h>
 #include <golioth/stream.h>
+#include <zcbor_encode.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
@@ -23,7 +24,7 @@ LOG_MODULE_REGISTER(app_sensors, LOG_LEVEL_DBG);
 static const struct device *o_dev = DEVICE_DT_GET_ANY(golioth_ostentus);
 #endif
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
-#include "battery_monitor/battery.h"
+#include <battery_monitor.h>
 #endif
 
 static struct golioth_client *client;
@@ -64,13 +65,12 @@ void app_sensors_init(void)
 }
 
 /* Callback for LightDB Stream */
-static void async_error_handler(struct golioth_client *client,
-				const struct golioth_response *response,
-				const char *path,
+static void async_error_handler(struct golioth_client *client, enum golioth_status status,
+				const struct golioth_coap_rsp_code *coap_rsp_code, const char *path,
 				void *arg)
 {
-	if (response->status != GOLIOTH_OK) {
-		LOG_ERR("Async task failed: %d", response->status);
+	if (status != GOLIOTH_OK) {
+		LOG_ERR("Async task failed: %d", status);
 		return;
 	}
 }
