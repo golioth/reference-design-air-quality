@@ -43,7 +43,7 @@ typedef enum {
 	PM10P0,
 #ifdef CONFIG_ALUDEL_BATTERY_MONITOR
 	BATTERY_V,
-	BATTERY_LVL,
+	BATTERY_PCT,
 #endif
 	FIRMWARE
 } slide_key;
